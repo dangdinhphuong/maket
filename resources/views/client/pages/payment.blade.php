@@ -166,11 +166,16 @@
 
                             if (res.data.products_id.includes(item.product_id.toString())) {
                                 const price = Math.ceil(item.products.price * (1 - item.products.discounts / 100));
-                                const totalPriceBeforeDiscount = price * item.quantity;
-                                const discountMultiplier = 1 - parseInt(res.data.discount_percent, 10) / 100;
+                                const totalPriceBeforeDiscount = price * item.quantity; // tổng tiền
+
+                                const discountMultiplier = 1 - (res.data.discount_percent / 100);
+
                                 const totalPriceAfterDiscount = Math.ceil(totalPriceBeforeDiscount * discountMultiplier);
 
-                                const discountAmount = totalPriceAfterDiscount * 0.04;
+                                const discountAmount = totalPriceBeforeDiscount - totalPriceAfterDiscount;
+
+                                console.log(price,totalPriceBeforeDiscount,discountMultiplier,totalPriceAfterDiscount)
+
                                 const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPriceAfterDiscount);
                                 const formattedDiscountAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount);
                                 totalDiscount += discountAmount;

@@ -23,6 +23,7 @@ use App\Common\Constants;
 use Carbon\Carbon;
 use App\Mail\ForgetPassMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Http;
 
 class ClientController extends Controller
 {
@@ -59,7 +60,9 @@ class ClientController extends Controller
 
         return $givenDate->lessThan($currentDate);
     }
-    public function convertToJSON($dataString) {
+
+    public function convertToJSON($dataString)
+    {
         // Loại bỏ dấu ngoặc kép không cần thiết nếu có
         $dataString = str_replace('"', '', $dataString);
 
@@ -71,12 +74,13 @@ class ClientController extends Controller
 
         return $json;
     }
+
     public function checkVoucher(Request $request)
     {
         $data = $request->all();
         $sales = Sale::where('code', $data["voucher"])
             ->where('active', 1)
-            ->where('number_sale','>', 0)
+            ->where('number_sale', '>', 0)
             ->first();
         if ($sales) {
             if ($this->isDateLessThanToday($sales->time_start) && $this->isDateGreaterThanToday($sales->time_end)) {
@@ -275,51 +279,69 @@ class ClientController extends Controller
         return redirect()->back();
     }
 
-    public function checkout(checkoutRequest $request)
+    public function savePayment(checkoutRequest $request)
     {
         DB::beginTransaction();
         try {
             $sales = [];
             $data = $request->all();
-            if(!empty($data['voucher'])){
-                $sales = Sale::where('code', $data["voucher"])->where('number_sale','>', 0)->where('active', 1) ->first();
+            session(['order' => $data]);
+            if (!empty($data['voucher'])) {
+                $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
                 if (empty($sales)) {
                     return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
                 }
                 if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
                     return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
                 }
-                $sales->update(['number_sale',$sales->number_sale-=1]);
+                $sales->update(['number_sale', $sales->number_sale -= 1]);
             }
-
             $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
             $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
             $carts->load('user')->load('products');
-
-            if ($carts->count() <= 0) {
-                return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
-            }
-            foreach ($carts as $cart) {
-                $product = Product::find($cart->products->id);
-                if ($product->quantity < $cart->quantity) {
-                    return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
+            if ($data['exampleRadios'] == "cash") {
+                if ($carts->count() <= 0) {
+                    return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
                 }
-                $data['name'] = $cart->products->namePro;
-                $data['slug'] = $cart->products->slug;
-                $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
-                $data['price'] = ceil($cart->products->price -(($cart->products->price * $cart->products->discounts )/100));
-                $data['quantity'] = $cart->quantity;
-                $data['order_id'] = $order->id;
-                $data['users_id'] = $cart->products->users_id;
-                $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
-                $product->update(['quantity' => $product->quantity - $cart->quantity]);
-                if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
-                    $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
-                    $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
-                }
+                foreach ($carts as $cart) {
+                    $product = Product::find($cart->products->id);
+                    if ($product->quantity < $cart->quantity) {
+                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
+                    }
+                    $data['name'] = $cart->products->namePro;
+                    $data['slug'] = $cart->products->slug;
+                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                    $data['quantity'] = $cart->quantity;
+                    $data['order_id'] = $order->id;
+                    $data['users_id'] = $cart->products->users_id;
+                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
+                    $product->update(['quantity' => $product->quantity - $cart->quantity]);
+                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
+                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
+                    }
 
-                OrderDetail::create($data);
-                $cart->delete();
+                    OrderDetail::create($data);
+                    $cart->delete();
+                }
+            } else {
+                $totalPayment = 0;
+                foreach ($carts as $cart) {
+                    $product = Product::find($cart->products->id);
+                    if ($product->quantity < $cart->quantity) {
+                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
+                    }
+                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
+
+                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
+                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
+                    }
+
+                    $totalPayment += ceil($data['totalPrice']);
+                }
+                dd($data,$totalPayment);
             }
             DB::commit();
             return redirect()->back()->with('message', 'Đơn hàng mua thành công');
@@ -329,7 +351,100 @@ class ClientController extends Controller
         }
 
     }
+    public function checkout(checkoutRequest $request)
+    {
+        DB::beginTransaction();
+        try {
+            $sales = [];
+            $data = $request->all();
+            session(['order' => $data]);
+            if (!empty($data['voucher'])) {
+                $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
+                if (empty($sales)) {
+                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                }
+                if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
+                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                }
+                $sales->update(['number_sale', $sales->number_sale -= 1]);
+            }
+            $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
+            $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
+            $carts->load('user')->load('products');
+            if ($data['exampleRadios'] == "cash") {
+                if ($carts->count() <= 0) {
+                    return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
+                }
+                foreach ($carts as $cart) {
+                    $product = Product::find($cart->products->id);
+                    if ($product->quantity < $cart->quantity) {
+                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
+                    }
+                    $data['name'] = $cart->products->namePro;
+                    $data['slug'] = $cart->products->slug;
+                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                    $data['quantity'] = $cart->quantity;
+                    $data['order_id'] = $order->id;
+                    $data['users_id'] = $cart->products->users_id;
+                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
+                    $product->update(['quantity' => $product->quantity - $cart->quantity]);
+                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
+                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
+                    }
 
+                    OrderDetail::create($data);
+                    $cart->delete();
+                }
+            } else {
+                $totalPayment = 0;
+                foreach ($carts as $cart) {
+                    $product = Product::find($cart->products->id);
+                    if ($product->quantity < $cart->quantity) {
+                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
+                    }
+                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
+
+                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
+                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
+                    }
+
+                    $totalPayment += ceil($data['totalPrice']);
+                }
+                $this->makeCurlRequestAndRedirect($totalPayment);
+                return true;
+
+            }
+            DB::commit();
+            return redirect()->back()->with('message', 'Đơn hàng mua thành công');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Đơn hàng mua thất bại');
+        }
+
+    }
+    public function makeCurlRequestAndRedirect($price)
+    {
+        // Your cURL request
+        $response = Http::get('https://monitoring-a3f31d970013.herokuapp.com/api/vn-pay', [
+            'vnp_TmnCode' => 'NRQRJA4J',
+            'vnp_HashSecret' => 'GLQYEDNCQMOQNNTMBWMPAAEDPWTWLFOH',
+            'vnp_Returnurl' => 'http://maket.test/',
+            'vnp_Amount' => $price,
+        ]);
+        return redirect('https://www.youtube.com/watch?v=yz1crJUO698');
+//        // Check if the request was successful (status code 2xx)
+//        if ($response->successful()) {
+//            // If you want to inspect the response, you can use $response->json() or $response->body()
+//            // Redirect to the specified URL
+//            return redirect('https://www.youtube.com/watch?v=yz1crJUO698');
+//        } else {
+//            // Handle the error if needed
+//            return redirect()->back()->with('error', 'Thanh toán thất bại');
+//        }
+    }
     public function order()
     {
         $Orders = Order::where('users_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
