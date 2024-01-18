@@ -24,6 +24,8 @@ use Carbon\Carbon;
 use App\Mail\ForgetPassMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redirect;
+use Exception;
 
 class ClientController extends Controller
 {
@@ -279,13 +281,13 @@ class ClientController extends Controller
         return redirect()->back();
     }
 
-    public function savePayment(checkoutRequest $request)
+    public function savePayment(Request $request)
     {
+       
         DB::beginTransaction();
         try {
             $sales = [];
-            $data = $request->all();
-            session(['order' => $data]);
+            $data = session()->get('order');
             if (!empty($data['voucher'])) {
                 $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
                 if (empty($sales)) {
@@ -296,10 +298,12 @@ class ClientController extends Controller
                 }
                 $sales->update(['number_sale', $sales->number_sale -= 1]);
             }
+            if(empty($request->vnp_ResponseCode) || $request->vnp_ResponseCode !="00"){
+                return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
+            }
             $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
             $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
             $carts->load('user')->load('products');
-            if ($data['exampleRadios'] == "cash") {
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
                 }
@@ -324,40 +328,23 @@ class ClientController extends Controller
                     OrderDetail::create($data);
                     $cart->delete();
                 }
-            } else {
-                $totalPayment = 0;
-                foreach ($carts as $cart) {
-                    $product = Product::find($cart->products->id);
-                    if ($product->quantity < $cart->quantity) {
-                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
-                    }
-                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
-                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
-
-                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
-                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
-                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
-                    }
-
-                    $totalPayment += ceil($data['totalPrice']);
-                }
-                dd($data,$totalPayment);
-            }
+         
             DB::commit();
-            return redirect()->back()->with('message', 'Đơn hàng mua thành công');
+            session()->forget('order');
+            return redirect()->route('payment')->with('message', 'Đơn hàng mua thành công');
         } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Đơn hàng mua thất bại');
+            return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
         }
 
     }
     public function checkout(checkoutRequest $request)
     {
+        $sales = [];
+        $data = $request->all();
+        session()->put('order', $data);
         DB::beginTransaction();
         try {
-            $sales = [];
-            $data = $request->all();
-            session(['order' => $data]);
             if (!empty($data['voucher'])) {
                 $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
                 if (empty($sales)) {
@@ -397,6 +384,7 @@ class ClientController extends Controller
                     $cart->delete();
                 }
             } else {
+
                 $totalPayment = 0;
                 foreach ($carts as $cart) {
                     $product = Product::find($cart->products->id);
@@ -413,9 +401,8 @@ class ClientController extends Controller
 
                     $totalPayment += ceil($data['totalPrice']);
                 }
-                $this->makeCurlRequestAndRedirect($totalPayment);
-                return true;
-
+                $response = $this->makeCurlRequestAndRedirect($totalPayment);
+                    return redirect()->to($response);
             }
             DB::commit();
             return redirect()->back()->with('message', 'Đơn hàng mua thành công');
@@ -431,19 +418,15 @@ class ClientController extends Controller
         $response = Http::get('https://monitoring-a3f31d970013.herokuapp.com/api/vn-pay', [
             'vnp_TmnCode' => 'NRQRJA4J',
             'vnp_HashSecret' => 'GLQYEDNCQMOQNNTMBWMPAAEDPWTWLFOH',
-            'vnp_Returnurl' => 'http://maket.test/',
+            'vnp_Returnurl' => route('payment-vnpay'),
             'vnp_Amount' => $price,
         ]);
-        return redirect('https://www.youtube.com/watch?v=yz1crJUO698');
-//        // Check if the request was successful (status code 2xx)
-//        if ($response->successful()) {
-//            // If you want to inspect the response, you can use $response->json() or $response->body()
-//            // Redirect to the specified URL
-//            return redirect('https://www.youtube.com/watch?v=yz1crJUO698');
-//        } else {
-//            // Handle the error if needed
-//            return redirect()->back()->with('error', 'Thanh toán thất bại');
-//        }
+       
+       if ($response->successful()) {
+           return $response->json()["data"];
+       } else {
+           return '';
+       }
     }
     public function order()
     {

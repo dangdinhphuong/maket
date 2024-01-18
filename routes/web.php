@@ -172,7 +172,7 @@ Route::get('blog/{slug}', [ClientController::class, 'blog'])->name('blog');
 // check login
 Route::get('carts', [ClientController::class, 'carts'])->middleware('clientLogin')->name('carts');
 Route::get('payment', [ClientController::class, 'payment'])->middleware('clientLogin')->name('payment');
-Route::get('payment-vnpay', [ClientController::class, 'savePayment'])->middleware('clientLogin');
+Route::get('payment-vnpay', [ClientController::class, 'savePayment'])->middleware('clientLogin')->name('payment-vnpay');
 Route::post('check-voucher', [ClientController::class, 'checkVoucher'])->middleware('clientLogin');
 Route::get('profile', [ClientController::class, 'profile'])->middleware('clientLogin')->name('profile');
 Route::post('profile', [ClientController::class, 'UpdateProfile'])->middleware('clientLogin')->name('UpdateProfile');
