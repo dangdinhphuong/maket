@@ -39,7 +39,7 @@ Route::get('quen-mat-khau', [ClientController::class, 'forgetPassword'])->name('
 Route::post('quen-mat-khau', [ClientController::class, 'SentPassword'])->name('SentPassword');
 Route::get('doi-mat-khau', [ClientController::class, 'ChangePassword'])->name('ChangePassword');
 Route::post('doi-mat-khau', [ClientController::class, 'SentChangePassword'])->name('SentChangePassword');
-Route::get('registered/store', [RegisteredStoreController::class, 'create']);
+Route::get('registered/store', [RegisteredStoreController::class, 'create'])->name('registered_shop');
 Route::post('registered/store', [RegisteredStoreController::class, 'save']);
 
 Route::name('cp-admin.')->middleware('AdminLogin')->prefix('cp-admin/')->group(function () {
@@ -181,6 +181,7 @@ Route::get('order/{id}', [ClientController::class, 'order_detail'])->middleware(
 Route::post('update-carts', [ClientController::class, 'updateCarts'])->middleware('clientLogin')->name('updateCarts');
 Route::post('checkout', [ClientController::class, 'checkout'])->middleware('clientLogin')->name('checkout');
 Route::post('api/orders/update/{id}', [OrderContrller::class, 'update'])->middleware('clientLogin');
+Route::post('comment', [ClientController::class, 'createComment'])->middleware('clientLogin')->name('createComment');
 
 
 // nhớ check user quyền đăng nhập người dùng

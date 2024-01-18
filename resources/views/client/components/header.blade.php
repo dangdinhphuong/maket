@@ -71,6 +71,9 @@
                                 <a href="{{$config->link_twitter}}" target="_blank"><i class="fa fa-twitter"></i></a>
                                 <a href="{{$config->link_linkedin}}" target="_blank"><i class="fa fa-linkedin"></i></a>
                             </div>
+                            <div class="header__top__right__auth">
+                                <a href="{{route('registered_shop')}}"><i class="fa fa-heart"></i>Đăng ký shop </a>
+                            </div>
                             @if(isset(auth()->user()->is_admin)&& auth()->user()->is_admin == 0)
                             <div class="header__top__right__language">
 

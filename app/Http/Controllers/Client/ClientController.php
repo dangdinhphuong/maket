@@ -16,6 +16,7 @@ use App\Models\contact;
 use App\Models\CategoryBlog;
 use App\Models\PasswordReset;
 use App\Models\User;
+use App\Models\Comment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use App\Http\Requests\checkoutRequest;
@@ -36,7 +37,7 @@ class ClientController extends Controller
         $this->categories = Category::orderBy('id', 'DESC')->limit(15)->get();
         $this->categories->load('products');
         View::share('categories', $this->categories);
-    }
+}
 
     public function index()
     {
@@ -45,6 +46,24 @@ class ClientController extends Controller
         // dd($this->currency_format(15656262));
         $category = $this->categories;
         return view('client.pages.home', compact('category', 'blogs'));
+    }
+    public function createComment(Request $request)
+    {
+
+         $comment = Comment::create($request->all());
+         $comment->load('customer','product');
+        if(!empty($comment)){
+            return response()->json([
+                'message' => "Bình luận thành công",
+                'data' => $comment,
+                'status' => "200"
+            ]);
+        }
+        return response()->json([
+            'message' => "Bình luận không hợp lệ",
+            'data' => [],
+            'status' => "500"
+        ]);
     }
 
     public function isDateGreaterThanToday($date)
@@ -124,7 +143,7 @@ class ClientController extends Controller
     public function productDetail(Request $request, $slug)
     {
         $categories_slug = '';
-        $Product = Product::with(['User','User.groupUser'])->where('slug', $slug)->where('status', 1)->first();
+        $Product = Product::with(['User','User.groupUser','comments.customer'])->where('slug', $slug)->where('status', 1)->first();
         $Product->load('category');
         if (!$Product) {
             return redirect()->back();
