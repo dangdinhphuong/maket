@@ -19,11 +19,11 @@
                                 <th>Hành động</th>
                             </tr>
                         </thead>
-                        @php $totalPrice = 0; @endphp
+                        @php $totalPrice = $provisionalMoney = 0; @endphp
                         <tbody>
                             @foreach($Orders->order_detail as $Order)
                                 @if($Order->status != 6)
-                                    @php $totalPrice += $Order->price * $Order->quantity;  @endphp
+                                    @php $provisionalMoney += $Order->price * $Order->quantity;  $totalPrice += $Order->totalPrice; @endphp
                                     @endif
                             <tr>
                                 <td>
@@ -58,6 +58,8 @@
                 <div class="shoping__checkout">
                     <h5>Hóa đơn</h5>
                     <ul>
+                        <li>Tổng tiền tạm tính <span>{{ number_format($provisionalMoney, 0, ',', '.') . " VNĐ"   }}</span></li>
+                        <li>Giảm giá <span> - {{ number_format($provisionalMoney - $totalPrice, 0, ',', '.') . " VNĐ"   }}</span></li>
                         <li>Tổng tiền thanh toán <span>{{ number_format($totalPrice, 0, ',', '.') . " VNĐ"   }}</span></li>
                         <li>Phương thức thanh toán <span>Thanh toán khi nhân hàng</span></li>
                         <li>Trạng thái <span>{{ App\Common\Constants::STATUS_ORDER[$Orders->status] }}</span></li>
