@@ -124,7 +124,7 @@ class ClientController extends Controller
     public function productDetail(Request $request, $slug)
     {
         $categories_slug = '';
-        $Product = Product::where('slug', $slug)->where('status', 1)->first();
+        $Product = Product::with(['User','User.groupUser'])->where('slug', $slug)->where('status', 1)->first();
         $Product->load('category');
         if (!$Product) {
             return redirect()->back();

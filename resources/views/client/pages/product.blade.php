@@ -66,7 +66,7 @@
                             <li><b>Nhà cung cấp</b> <span>{{$Product->supplier->nameSupplier}}</span></li>
                             <li><b>Xuất xứ </b> <span>{{$Product->origin->name}}</span></li>
                             <li><b>Vận chuyển </b> <span><samp>Miễn phí vẫn chuyển</samp></span></li>
-                            <li><b>Hoàn tiền </b> <span><samp>100%</samp> Cho mọi đơn hàng</span></li>
+                            <li><b>Cửa hàng </b> <span> {{$Product->User->groupUser->name ?? ""}}</span></li>
                         </ul>
                     </div>
 
