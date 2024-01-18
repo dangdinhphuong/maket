@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('status')->default(0);
             $table->string('slug');
             $table->double('price');
+            $table->double('totalPrice');
             $table->integer('quantity');
             $table->foreignId('users_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('order_id')->constrained('orders')->onUpdate('cascade')->onDelete('cascade');
