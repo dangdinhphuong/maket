@@ -30,6 +30,17 @@
                         </span>
                         @enderror
                     </div>
+                    @if(auth()->user()->role_id == 3)
+                    <div class="form-group">
+                        <label for="exampleInputEmail1">Tên cửa hàng</label>
+                        <input type="text" value="{{auth()->user()->groupUser->name}}" name="shopName" disabled class="form-control form-control-user">
+                        @error('shopName')
+                        <span class="text-danger">
+                            {{$message}}
+                        </span>
+                        @enderror
+                    </div>
+                    @endif
                     <div class="form-group">
                         <label for="exampleInputEmail1">Họ và tên</label>
                         <input type="text" value="{{auth()->user()->fullname}}" name="fullname" class="form-control form-control-user">

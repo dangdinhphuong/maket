@@ -110,7 +110,7 @@
                                                             class="rounded-circle mr-2">
                                                         <input type="text" class="form-control" id="commentInput"
                                                             placeholder="Enter your comment...">
-                                                        <button onclick="addComment()"
+                                                        <button onclick="addComment()" {{ empty(auth()->user()->id) ? 'disabled' : ''  }}
                                                             class="btn btn-primary">Submit</button>
                                                     </div>
                                                     <div class="mt-2" id="commentsContainer">
@@ -247,14 +247,9 @@
 @endsection
 
 @section('javascript')
+    @if(!empty(auth()->user()->id))
     <script>
         function addComment1(data) {
-
-
-
-
-
-
                 // // Get the value of the input field
                 // var newCommentText = $('#commentInput').val();
 
@@ -316,4 +311,5 @@
             });
         }
     </script>
+    @endif
 @endsection
