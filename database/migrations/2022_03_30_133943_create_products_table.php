@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('status');
             $table->double('discounts')->default(0);
             $table->string('slug')->unique();
-            $table->text('Description');
+            $table->text('Description')->nullable();
             $table->foreignId('origin_id')->constrained('origins')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('users_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('category_id')->constrained('categories')->onUpdate('cascade')->onDelete('cascade');

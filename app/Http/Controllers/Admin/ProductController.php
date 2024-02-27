@@ -49,7 +49,7 @@ class ProductController extends Controller
         $pathAvatar = str_replace("public/", "", $pathAvatar);
         try {
             DB::beginTransaction();
-            $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id','cost']);
+            $data = $request->all();
             $data['users_id'] = auth()->user()->id;
             $data['image'] = $pathAvatar;
             Product::create($data);
@@ -57,7 +57,14 @@ class ProductController extends Controller
             return redirect()->route('cp-admin.products.index')->with('message', 'Thêm sản phẩm thành công !');
         } catch (Exception $exception) {
             DB::rollBack();
-            Log::error('message :', $exception->getMessage() . '--line :' . $exception->getLine());
+            Log::error('message', [
+                'message' => $exception->getMessage(),
+                'line' => $exception->getLine()
+            ]);
+            dd([
+                'message' => $exception->getMessage(),
+                'line' => $exception->getLine()
+            ]);
             if (file_exists('storage/' . $pathAvatar)) {
                 unlink('storage/' . $pathAvatar);
             }
