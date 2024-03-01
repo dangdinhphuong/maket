@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products')->onUpdate('cascade')->onDelete('cascade');
             $table->string('variant_type'); // color, weight, size, etc.
             $table->text('variant_value'); // Red, 10kg, Large, etc.
+            $table->double('price')->nullable();
+            $table->integer('image_id')->nullable();
             $table->timestamps();
         });
     }
