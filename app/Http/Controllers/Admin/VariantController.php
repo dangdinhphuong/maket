@@ -67,14 +67,10 @@ class VariantController extends Controller
             ]);
         }
         $variantImage = ProductImage::find($variant->image_id);
-        if (!$variantImage) {
-            return response()->json([
-                'message' => "Danh biến thể không tồn tại",
-                'status' => "404"
-            ]);
-        }
         $variant->delete();
-        $variantImage->delete();
+        if ($variantImage) {
+            $variantImage->delete();
+        }
         return response()->json([
             'message' => "Xóa danh biến thể thành công",
             'status' => "200"
