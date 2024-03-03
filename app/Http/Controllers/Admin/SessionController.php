@@ -68,7 +68,7 @@ class SessionController extends Controller
             return redirect()->route('home')->with('message', "Tài khoản của bạn đăng nhập thành công !");
         }
         RateLimiter::clear($key);
-        return redirect()->route('cp-admin.dashboad');
+        return redirect()->intended(route('cp-admin.dashboad'));
     }
 
 

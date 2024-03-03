@@ -96,6 +96,7 @@
                         <td>
                         @can('SUA-SAN-PHAM')
                             <a href="{{route('cp-admin.products.edit',[ 'id' => $product->id ])}}" class="btn-lg"><i class="fas fa-pencil-alt"></i></a>
+                            <a href="{{route('cp-admin.products.variant.edit',[ 'id' => $product->id ])}}" class="btn-lg"><i class="fas fa-pencil-alt"></i></a>
                             @endcan
                             @can('XOA-SAN-PHAM')
                             <a class="btn-lg" onclick="deleteCate({{ $product->id}})"><i class="fas fa-trash"></i></a>

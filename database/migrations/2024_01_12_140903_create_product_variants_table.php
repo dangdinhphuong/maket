@@ -19,7 +19,9 @@ return new class extends Migration
             $table->string('variant_type'); // color, weight, size, etc.
             $table->text('variant_value'); // Red, 10kg, Large, etc.
             $table->double('price')->nullable();
+            $table->integer('quantity')->nullable();
             $table->integer('image_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
