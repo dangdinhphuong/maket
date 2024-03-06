@@ -16,11 +16,11 @@ class VariantController extends Controller
         if (!$Product) {
             return redirect()->back();
         }
-        $variants= ProductVariant::where('product_id',$id)->get();
-        return view('admin.pages.product.variant', compact('variants','Product'));
+        $variants = ProductVariant::where('product_id', $id)->get();
+        return view('admin.pages.product.variant', compact('variants', 'Product'));
     }
 
-    public function variantUpdate(Request $request,$id)
+    public function variantUpdate(Request $request, $id)
     {
         $data = $request->all();
         $variants = [];
@@ -28,24 +28,27 @@ class VariantController extends Controller
         if (!$Product) {
             return redirect()->back();
         }
-     
+
         foreach ($data['variants'] as $key => $item) {
             $variants[] = $this->formatVariant($item, $id);
         }
         ProductVariant::insert($variants);
         return redirect()->back();
     }
+
     public function formatVariant($data, $productId)
     {
-        $productImage =  $this->imageVariant($data, $productId);
-        $data['image'] = $productImage->image;
+        if (!empty($data['image'])) {
+            $productImage = $this->imageVariant($data, $productId);
+        }
+        $data['image'] = $productImage->image ?? '';
         return [
             'product_id' => $productId,
             'variant_type' => "tên",
             'variant_value' => json_encode($data),
             'price' => $data["price"],
             'quantity' => $data["quantity"],
-            'image_id' => $productImage->id
+            'image_id' => $productImage->id ?? null
         ];
     }
 
@@ -53,7 +56,7 @@ class VariantController extends Controller
     {
         $pathAvatar = $data['image']->store('public/images/products');
         $pathAvatar = str_replace("public/", "", $pathAvatar);
-       $productImage =  ProductImage::create(['product_id'=>$productId, 'image'=>$pathAvatar]);
+        $productImage = ProductImage::create(['product_id' => $productId, 'image' => $pathAvatar]);
         return $productImage;
     }
 
