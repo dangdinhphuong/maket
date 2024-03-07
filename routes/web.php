@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\ContactContrller;
 use App\Http\Controllers\Admin\OrderContrller;
 use App\Http\Controllers\Admin\BlogsController;
 use App\Http\Controllers\Admin\SaleController;
+use App\Http\Controllers\Admin\ProductVariantController;
 use App\Http\Controllers\Admin\VariantController;
 use App\Http\Controllers\Admin\SessionController as AdminSessionController;
 use App\Http\Controllers\RegisteredStoreController;
@@ -73,10 +74,20 @@ Route::name('cp-admin.')->middleware('AdminLogin')->prefix('cp-admin/')->group(f
         Route::post('update/{id}', [ProductController::class, 'update'])->name('update')->middleware('can:SUA-SAN-PHAM');
         Route::get('delete/{id}', [ProductController::class, 'delete'])->name('delete')->middleware('can:XOA-SAN-PHAM');
         Route::name('variant.')->group(function () {
-            Route::get('{id}/variant', [VariantController::class, 'variant'])->name('edit')->middleware('can:SUA-SAN-PHAM');
-            Route::post('{product_id}/variant/update', [VariantController::class, 'variantUpdate'])->name('update')->middleware('can:SUA-SAN-PHAM');
-            Route::get('{product_id}/variant/delete/{id}', [VariantController::class, 'variantDelete'])->name('delete')->middleware('can:SUA-SAN-PHAM');
+            Route::get('{id}/variant', [ProductVariantController::class, 'edit'])->name('edit')->middleware('can:SUA-SAN-PHAM');
+            Route::post('{product_id}/variant/update', [ProductVariantController::class, 'update'])->name('update')->middleware('can:SUA-SAN-PHAM');
+            Route::get('{product_id}/variant/delete/{id}', [ProductVariantController::class, 'delete'])->name('delete')->middleware('can:SUA-SAN-PHAM');
         });
+    });
+
+    // Variants
+    Route::name('variant.')->middleware('AdminLogin')->prefix('variant/')->group(function () {
+        Route::get('/', [VariantController::class, 'index'])->name('index')->middleware('can:XEM-SAN-PHAM');
+        Route::get('create', [VariantController::class, 'create'])->name('create')->middleware('can:THEM-LOAI-SAN-PHAM');
+        Route::post('store', [VariantController::class, 'store'])->name('store')->middleware('can:THEM-SAN-PHAM');
+        Route::get('edit/{id}', [VariantController::class, 'edit'])->name('edit')->middleware('can:SUA-SAN-PHAM');
+        Route::post('update/{id}', [VariantController::class, 'update'])->name('update')->middleware('can:SUA-SAN-PHAM');
+        Route::get('delete/{id}', [VariantController::class, 'delete'])->name('delete')->middleware('can:XOA-SAN-PHAM');
     });
 
     // Nhà cung câp
