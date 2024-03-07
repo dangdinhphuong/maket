@@ -32,5 +32,6 @@ function ChangeToSlug(name ,slugs)
     slug = slug.replace(/\@\-|\-\@|\@/gi, '');
     //In slug ra textbox có id “slug”
     slug = slug.replace(/\s+/g, '');
+    console.log(slugs,slug);
     document.getElementById(slugs).value = slug;
 }

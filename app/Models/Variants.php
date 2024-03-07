@@ -9,7 +9,7 @@ class Variants extends Model
 {
     use HasFactory, SoftDeletes;
     protected $table = 'variants';
-    protected $fillable = ['user_id', 'name', 'slug'];
+    protected $fillable = ['user_id', 'name', 'type', 'slug'];
 
     public function scopeFilter($query, array $filters)
     {

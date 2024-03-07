@@ -39,6 +39,13 @@
                 <span>Sản phẩm</span></a>
         </li>
     @endcan
+    @can('XEM-SAN-PHAM')
+    <li class="nav-item active">
+        <a class="nav-link" href="{{route('cp-admin.variant.index')}}">
+            <i class="far fa-circle nav-icon"></i>
+            <span>Loại biến thể</span></a>
+    </li>
+@endcan
     @can('XEM-VOUCHER')
         <li class="nav-item active">
             <a class="nav-link" href="{{route('cp-admin.voucher.index')}}">

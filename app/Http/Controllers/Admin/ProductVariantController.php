@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\ProductImage;
+use App\Models\Variants;
 
 class ProductVariantController extends Controller
 {
@@ -16,8 +17,9 @@ class ProductVariantController extends Controller
         if (!$Product) {
             return redirect()->back();
         }
+        $typeVariants = Variants::where('user_id',auth()->user()->id)->get();
         $variants = ProductVariant::where('product_id', $id)->get();
-        return view('admin.pages.product.variant', compact('variants', 'Product'));
+        return view('admin.pages.product.variant', compact('variants', 'Product','typeVariants' ));
     }
 
     public function update(Request $request, $id)

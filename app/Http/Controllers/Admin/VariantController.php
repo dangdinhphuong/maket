@@ -1,107 +1,98 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Variants;
+
 class VariantController extends Controller
 {
+    protected $variants;
 
+    public function __construct(Variants $variants)
+    {
+        $this->variants = $variants;
+    }
     public function index(Request $request)
     {
-        $categories = Variants::filter(request(['search']))->orderBy('id','DESC')->paginate(15);
-        $categories->load('products'); // gọi products bên model
-
-        return view('admin.pages.categories.index',compact('categories'));
+        $typeVariants = $this->variants->where('user_id',auth()->user()->id)->filter(request(['search']))->orderBy('id', 'DESC')->paginate(15);
+        return view('admin.pages.variants.index', compact('typeVariants'));
     }
 
     public function create()
     {
         return view('admin.pages.variants.create');
     }
+
     public function store(Request $request)
     {
-        $this->validate(request(),[
-            'nameCate'=>'required|min:3|max:100|unique:categories,nameCate',
-            'slug'=>'required|min:3|max:100|unique:categories,slug',
-            'banner' => 'required|mimes:jpg,bmp,png|max:2048',
-        ],
-        [
-            'nameCate.required'=>'Bạn chưa nhập tên danh mục',
-            'nameCate.unique' => 'Tên danh mục không được trùng',
-            'nameCate.min'=>'Tên danh mục phải có Độ dài  từ 3 đến 100 ký tự',
-            'nameCate.max'=>'Tên danh mục phải có Độ dài  từ 3 đến 100 ký tự',
-            'slug.required'=>'Bạn chưa nhập slug',
-            'slug.unique' => 'Slug không được trùng',
-            'slug.min'=>'Slug phải có Độ dài  từ 3 đến 100 ký tự',
-            'slug.max'=>'Slug phải có Độ dài  từ 3 đến 100 ký tự',
-            'banner.required' => 'Banner không được trống',
-            'banner.mimes'=>'Banner Không đúng định dạng quy định (jpg,bmp,png)',
-            'banner.max'=>'Banner dụng lượng tối đa 2048mb',
-        ]);
-       $pathAvatar = $request->file('banner')->store('public/images/Variants');
-       $pathAvatar = str_replace("public/", "", $pathAvatar);
-       $data = request(['nameCate','slug']);
-       $data['users_id'] = auth()->user()->id;
-       $data['banner'] = $pathAvatar;
-        Variants::create($data);
-       return redirect()->route('cp-admin.Variants.index');
+        $this->validate(
+            request(),
+            [
+                'name' => 'required|min:3|max:100|unique:variants,name,NULL,id,user_id,' . auth()->user()->id,
+                'slug' => 'required|min:3|max:100|unique:variants,slug,NULL,id,user_id,' . auth()->user()->id
+            ],
+            [
+                'name.required' => 'Bạn chưa nhập tên danh mục',
+                'name.unique' => 'Tên danh mục không được trùng',
+                'name.min' => 'Tên danh mục phải có Độ dài  từ 3 đến 100 ký tự',
+                'name.max' => 'Tên danh mục phải có Độ dài  từ 3 đến 100 ký tự',
+                'slug.required' => 'Bạn chưa nhập slug',
+                'slug.unique' => 'Slug không được trùng',
+                'slug.min' => 'Slug phải có Độ dài  từ 3 đến 100 ký tự',
+                'slug.max' => 'Slug phải có Độ dài  từ 3 đến 100 ký tự',
+            ]
+        );
+        $data = $request->all();
+        $data['user_id'] = auth()->user()->id;
+        $this->variants->create($data);
+        return redirect()->route('cp-admin.variant.index');
     }
+
     public function edit($id)
     {
-        $Variants = Variants::find($id);
-        return view('admin.pages.categories.edit', compact('Variants'));
+        $variant = $this->variants->where('id', $id)->where('user_id', auth()->user()->id)->first();
+        return view('admin.pages.variants.edit', compact('variant'));
     }
-    public function update(Request $request ,$id)
+
+    public function update(Request $request, $id)
     {
-        $Variants = Variants::find($id);
-        $this->validate(request(),[
-            'nameCate'=>'required|min:3|max:100|unique:categories,nameCate,'.$Variants->id,
-            'slug'=>'required|min:3|max:100|unique:categories,slug,'.$Variants->id,
-            'banner' => 'mimes:jpg,bmp,png|max:2048',
-        ],
-        [
-            'nameCate.required'=>'Bạn chưa nhập tên danh mục',
-            'nameCate.unique' => 'Tên danh mục không được trùng',
-            'nameCate.min'=>'Tên danh mục phải có Độ dài  từ 3 đến 100 ký tự',
-            'nameCate.max'=>'Tên danh mục phải có Độ dài  từ 3 đến 100 ký tự',
-            'slug.required'=>'Bạn chưa nhập slug',
-            'slug.unique' => 'Slug không được trùng',
-            'slug.min'=>'Slug phải có Độ dài  từ 3 đến 100 ký tự',
-            'slug.max'=>'Slug phải có Độ dài  từ 3 đến 100 ký tự',
-            'banner.mimes'=>'Banner Không đúng định dạng quy định (jpg,bmp,png)',
-            'banner.max'=>'Banner dụng lượng tối đa 2048mb',
-        ]);
-        if ($request->file('banner') != null) {
-            if (file_exists('storage/' . $Variants->banner)) {
-                unlink('storage/' . $Variants->banner);
-            }
-            $pathAvatar = $request->file('banner')->store('public/images/Variants');
-            $pathAvatar = str_replace("public/", "", $pathAvatar);
-        } else {
-            $pathAvatar = $Variants->banner;
-        }
-        $data = request(['nameCate','slug']);
-        $data['users_id'] = auth()->user()->id;
-        $data['banner'] = $pathAvatar;
-        $Variants->update($data);
-         return redirect()->route('cp-admin.Variants.index')->with('message','Cập nhật thành công');
+        // Lọc dữ liệu trước khi validation
+        $data = $request->except(['_token']);
+    
+        // Validation
+        $this->validate(
+            $request,
+            [
+                'name' => 'required|min:3|max:100|unique:variants,name,'.$id.',id,user_id,'.auth()->user()->id,
+                'slug' => 'required|min:3|max:100|unique:variants,slug,'.$id.',id,user_id,'.auth()->user()->id
+            ],
+            [
+                'name.required' => 'Bạn chưa nhập tên danh mục',
+                'name.unique' => 'Tên danh mục không được trùng',
+                'name.min' => 'Tên danh mục phải có độ dài từ 3 đến 100 ký tự',
+                'name.max' => 'Tên danh mục phải có độ dài từ 3 đến 100 ký tự',
+                'slug.required' => 'Bạn chưa nhập slug',
+                'slug.unique' => 'Slug không được trùng',
+                'slug.min' => 'Slug phải có độ dài từ 3 đến 100 ký tự',
+                'slug.max' => 'Slug phải có độ dài từ 3 đến 100 ký tự',
+            ]
+        );
+    
+        // Cập nhật dữ liệu
+        $data['user_id'] = auth()->user()->id;
+        $this->variants->where('id', $id)->where('user_id', auth()->user()->id)->update($data);
+    
+        // Redirect sau khi cập nhật thành công
+        return redirect()->route('cp-admin.variant.index')->with('message', 'Cập nhật thành công');
     }
+    
     public function delete($id)
     {
-        $Variants = Variants::find($id);
-        $Variants->load('products');
-        if($Variants){
-            if($Variants->products->count()>=1){
-                return response()->json([
-                    'message' => "Không thể xóa khi vẫn còn số lượng khách hàng",
-                    'status' => "401"
-                ]);
-            }
-            $Variants->delete();
-            if (file_exists('storage/' . $Variants->banner)) {
-                unlink('storage/' . $Variants->banner);
-            }
+        $variant = $this->variants->where('id', $id)->where('user_id', auth()->user()->id)->first();
+        if ($variant) {
+            $variant->delete();
             return response()->json([
                 'message' => "Xóa danh mục thành công",
                 'status' => "200"
