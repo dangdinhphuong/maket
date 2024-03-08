@@ -44,12 +44,19 @@
                             <i class="fa fa-star-half-o"></i>
                             <span>(18 đánh giá)</span>
                         </div>
+                        @if (!empty($Product->minPiceProduct))
+                        <div class="product__details__price">
+                            {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' VNĐ' }}
+                        </div>
+                    @else
                         <div class="product__details__price">
                             {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' VNĐ' }}
                             @if ($Product->discounts > 0)
                                 <span>{{ number_format($Product->price, 0, ',', '.') . ' VNĐ' }}</span>
                             @endif
                         </div>
+                        @endif
+                        
                         <div class="product__details__quantity">
                             @csrf
                             <div class="quantity">

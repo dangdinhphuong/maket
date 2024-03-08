@@ -17,7 +17,7 @@
                         <div class="col-sm-12 mb-3 mb-sm-3">
                             <label for="slugCategories">Loại biến thể</label> <br>
                             <select class="form-select w-100" id="multiple-select-variant"
-                                data-placeholder="Chọn loại biến thể" multiple>
+                                data-placeholder="Chọn loại biến thể" data-maximum-selection="3" multiple>
                                 <option value="color">Color</option>
                                 <option value="size">Size</option>
                                 <option value="weight">Weight</option>
@@ -102,9 +102,12 @@
     </div>
 @endsection
 @section('javascript')
-    <script>
-        $('#multiple-select-variant').select2();
-    </script>
+<script>
+    $('#multiple-select-variant').select2({
+        maximumSelectionLength: 3, // Enforce maximum selection with Select2
+        placeholder: "Chọn loại biến thể (tối đa 3)" // Update placeholder with limit info
+    });
+</script>
 
     <script>
         $(function() {
@@ -188,9 +191,9 @@
                 variantHtml +=
                     `<div class="form-group" style="width: 15%; margin-right: 1%;"><label for="slugCategories">Image</label><input type="file" step="0.01" min="0" name="variants[${randomStr}][image]" id="product_image_${randomStr}" onchange="previewFile(this, '${randomStr}')" class="form-control float-right w-100" placeholder="Ảnh"></div>`;
                 variantHtml +=
-                    `<div class="form-group" style="width: 15%; margin-right: 1%;"> <img style="width: 100%;height: 50%;" id="previewimg_${randomStr}" alt=""></div>`;
+                    `<div class="form-group" style="width: 10%; margin-right: 1%;"> <img style="width: 100%;height: 50%;" id="previewimg_${randomStr}" alt=""></div>`;
                 variantHtml +=
-                    ` <div class="form-group float-right"style="width: 10%; margin-right: 1%;"> <div class="btn btn-primary w-2 mb-5 float-right "  style="    margin-top: 28%;"><i class="fas fa-fw fa-trash trash-icon"></i></div>
+                    ` <div class="form-group float-right"style="width: 5%; margin-right: 1%;"> <div class="btn btn-primary w-2 mb-5 float-right "  style="    margin-top: 28%;"><i class="fas fa-fw fa-trash trash-icon"></i></div>
                     `;
                 variantHtml += '</div>';
                 var numberOfVariants = $('.variants-container .form-row').length;

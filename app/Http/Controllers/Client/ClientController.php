@@ -37,7 +37,7 @@ class ClientController extends Controller
         $this->categories = Category::orderBy('id', 'DESC')->limit(15)->get();
         $this->categories->load('products');
         View::share('categories', $this->categories);
-}
+    }
 
     public function index()
     {
@@ -50,9 +50,9 @@ class ClientController extends Controller
     public function createComment(Request $request)
     {
 
-         $comment = Comment::create($request->all());
-         $comment->load('customer','product');
-        if(!empty($comment)){
+        $comment = Comment::create($request->all());
+        $comment->load('customer', 'product');
+        if (!empty($comment)) {
             return response()->json([
                 'message' => "Bình luận thành công",
                 'data' => $comment,
@@ -133,17 +133,35 @@ class ClientController extends Controller
         }
         $products = Product::filter(array_merge(request(['search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
             ->where('status', 1)
-            // ->orderBy('id', 'DESC')
-            ->Paginate(9);
-
+            ->with(['productVariant'])
+            ->Paginate(10);
+        foreach ($products as $index => $value) {
+            if (count($value['productVariant']) >0 ) {
+                $sortedProducts = $products[$index]['productVariant']->sortBy('price');
+                $minPriceProduct = $sortedProducts->first();
+                $maxPriceProduct = $sortedProducts->last();
+                $products[$index]['minPiceProduct'] = $minPriceProduct->price;
+                $products[$index]['maxPriceProduct'] = $maxPriceProduct->price;
+            }
+        }
+        //dd($products[0]);
         $category = $this->categories->load('products');
         return view('client.pages.products', compact('category', 'products', 'categories_slug'));
     }
 
+
+    // // Sử dụng hàm để lấy sản phẩm có giá thấp nhất và cao nhất
+    // $minMaxPriceProducts = getMinMaxPriceProducts($products);
+    // $minPriceProduct = $minMaxPriceProducts['min_price_product'];
+    // $maxPriceProduct = $minMaxPriceProducts['max_price_product'];
+
+    // Bây giờ bạn có thể sử dụng $minPriceProduct và $maxPriceProduct như mong muốn
+
+
     public function productDetail(Request $request, $slug)
     {
         $categories_slug = '';
-        $Product = Product::with(['User','User.groupUser','comments.customer'])->where('slug', $slug)->where('status', 1)->first();
+        $Product = Product::with(['User', 'User.groupUser', 'comments.customer','productVariant','productImage'])->where('slug', $slug)->where('status', 1)->first();
         $Product->load('category');
         if (!$Product) {
             return redirect()->back();
@@ -153,6 +171,13 @@ class ClientController extends Controller
             ->where('category_id', $Product->category->id)
             ->orderBy('id', 'DESC')
             ->get();
+                if (count($Product['productVariant']) >0 ) {
+                    $sortedProducts = $Product['productVariant']->sortBy('price');
+                    $minPriceProduct = $sortedProducts->first();
+                    $maxPriceProduct = $sortedProducts->last();
+                    $Product['minPiceProduct'] = $minPriceProduct->price;
+                    $Product['maxPriceProduct'] = $maxPriceProduct->price;
+                }
         return view('client.pages.product', compact('Product', 'RelatedProducts'));
     }
 
@@ -302,7 +327,7 @@ class ClientController extends Controller
 
     public function savePayment(Request $request)
     {
-       
+
         DB::beginTransaction();
         try {
             $sales = [];
@@ -317,37 +342,37 @@ class ClientController extends Controller
                 }
                 $sales->update(['number_sale', $sales->number_sale -= 1]);
             }
-            if(empty($request->vnp_ResponseCode) || $request->vnp_ResponseCode !="00"){
+            if (empty($request->vnp_ResponseCode) || $request->vnp_ResponseCode != "00") {
                 return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
             }
             $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
             $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
             $carts->load('user')->load('products');
-                if ($carts->count() <= 0) {
-                    return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
+            if ($carts->count() <= 0) {
+                return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
+            }
+            foreach ($carts as $cart) {
+                $product = Product::find($cart->products->id);
+                if ($product->quantity < $cart->quantity) {
+                    return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
                 }
-                foreach ($carts as $cart) {
-                    $product = Product::find($cart->products->id);
-                    if ($product->quantity < $cart->quantity) {
-                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
-                    }
-                    $data['name'] = $cart->products->namePro;
-                    $data['slug'] = $cart->products->slug;
-                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
-                    $data['quantity'] = $cart->quantity;
-                    $data['order_id'] = $order->id;
-                    $data['users_id'] = $cart->products->users_id;
-                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
-                    $product->update(['quantity' => $product->quantity - $cart->quantity]);
-                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
-                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
-                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
-                    }
+                $data['name'] = $cart->products->namePro;
+                $data['slug'] = $cart->products->slug;
+                $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                $data['quantity'] = $cart->quantity;
+                $data['order_id'] = $order->id;
+                $data['users_id'] = $cart->products->users_id;
+                $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
+                $product->update(['quantity' => $product->quantity - $cart->quantity]);
+                if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                    $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
+                    $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
+                }
 
-                    OrderDetail::create($data);
-                    $cart->delete();
-                }
-         
+                OrderDetail::create($data);
+                $cart->delete();
+            }
+
             DB::commit();
             session()->forget('order');
             return redirect()->route('payment')->with('message', 'Đơn hàng mua thành công');
@@ -355,7 +380,6 @@ class ClientController extends Controller
             DB::rollBack();
             return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
         }
-
     }
     public function checkout(checkoutRequest $request)
     {
@@ -421,7 +445,7 @@ class ClientController extends Controller
                     $totalPayment += ceil($data['totalPrice']);
                 }
                 $response = $this->makeCurlRequestAndRedirect($totalPayment);
-                    return redirect()->to($response);
+                return redirect()->to($response);
             }
             DB::commit();
             return redirect()->back()->with('message', 'Đơn hàng mua thành công');
@@ -429,7 +453,6 @@ class ClientController extends Controller
             DB::rollBack();
             return redirect()->back()->with('error', 'Đơn hàng mua thất bại');
         }
-
     }
     public function makeCurlRequestAndRedirect($price)
     {
@@ -440,12 +463,12 @@ class ClientController extends Controller
             'vnp_Returnurl' => route('payment-vnpay'),
             'vnp_Amount' => $price,
         ]);
-       
-       if ($response->successful()) {
-           return $response->json()["data"];
-       } else {
-           return '';
-       }
+
+        if ($response->successful()) {
+            return $response->json()["data"];
+        } else {
+            return '';
+        }
     }
     public function order()
     {

@@ -43,6 +43,17 @@ class Product extends Model
     {
         return $this->hasMany(Sale::class, 'sale_id');
     }
+
+    public function productVariant()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    
+    public function productImage()
+    {
+        return $this->hasMany(ProductImage::class);
+    }
     public function User()
     {
         return $this->belongsTo(User::class, 'users_id');
