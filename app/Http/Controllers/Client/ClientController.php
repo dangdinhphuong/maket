@@ -178,6 +178,7 @@ class ClientController extends Controller
                     $Product['minPiceProduct'] = $minPriceProduct->price;
                     $Product['maxPriceProduct'] = $maxPriceProduct->price;
                 }
+               // dd($Product->productVariant);
         return view('client.pages.product', compact('Product', 'RelatedProducts'));
     }
 

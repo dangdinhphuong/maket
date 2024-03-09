@@ -1,14 +1,6 @@
 @extends('client.master')
 @section('title', 'Siêu thị thực phẩm')
 @section('content')
-    <style>
-        .owl-item {
-            width: 123.75px;
-            height: 130px;
-            margin-right: 20px;
-            background-color: #fff;
-        }
-    </style>
     <section class="breadcrumb-section set-bg" data-setbg="{{ asset('storage/' . $Product->category->banner) }}">
         <div class="container">
             <div class="row">
@@ -35,18 +27,8 @@
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__pic">
                         <div class="product__details__pic__item">
-                            <img class="product__details__pic__item--large"
-                                 src="{{ asset('storage/' . $Product->image) }}" alt="" style="height: 500px">
-                        </div>
-                        <div class="product__details__pic__slider owl-carousel">
-                            @if(count($Product->productImage) >1)
-                                <img data-imgbigurl="{{ asset('storage/' . $Product->image) }}"
-                                     src="{{ asset('storage/' . $Product->image) }}" alt="">
-                                @foreach($Product->productImage as $item)
-                                    <img data-imgbigurl="{{ asset('storage/' . $item->image) }}"
-                                         src="{{ asset('storage/' . $item->image) }}" alt="">
-                                @endforeach
-                            @endif
+                            <img class="product__details__pic__item--large" src="{{ asset('storage/' . $Product->image) }}"
+                                alt="">
                         </div>
                     </div>
                 </div>
@@ -63,40 +45,18 @@
                             <span>(18 đánh giá)</span>
                         </div>
                         @if (!empty($Product->minPiceProduct))
-                            <div class="product__details__price">
-                                {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' VNĐ' }}
-                            </div>
-                        @else
-                            <div class="product__details__price">
-                                {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' VNĐ' }}
-                                @if ($Product->discounts > 0)
-                                    <span>{{ number_format($Product->price, 0, ',', '.') . ' VNĐ' }}</span>
-                                @endif
-                            </div>
-                        @endif
-                        <ul id="info-Variant" style="padding-top: 0px; margin-top: 0px; margin-bottom: 2px">
-                            <li> <span style="background-color:  #ed1212"></span></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                        </ul>
-                        <div class="card w-100 mb-2">
-                            <div class="card-header">
-                                Phân loại
-                            </div>
-                            <div class="card-body">
-                                @foreach($Product->productVariant as $productVariant)
-                                <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}" onclick="selectVariant(this)">{{ $productVariant->variant_type }}</div>
-                                @endforeach
-                            </div>
+                        <div class="product__details__price">
+                            {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' VNĐ' }}
                         </div>
-
+                    @else
+                        <div class="product__details__price">
+                            {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' VNĐ' }}
+                            @if ($Product->discounts > 0)
+                                <span>{{ number_format($Product->price, 0, ',', '.') . ' VNĐ' }}</span>
+                            @endif
+                        </div>
+                        @endif
+                        
                         <div class="product__details__quantity">
                             @csrf
                             <div class="quantity">
@@ -111,6 +71,13 @@
                             <button class="primary-btn" onclick="addToCart({{ $Product->id }})"
                                 {{ $Product->quantity <= 0 ? 'disabled' : '' }}>{{ $Product->quantity <= 0 ? 'Sản phẩm đã hết hàng' : 'Thêm vào giỏ hàng' }}</button>
                         @endif
+                        <ul>
+                            <li><b>Số lượng sản phẩm </b> <span>{{ $Product->quantity }} SP</span></li>
+                            <li><b>Nhà cung cấp</b> <span>{{ $Product->supplier->nameSupplier }}</span></li>
+                            <li><b>Xuất xứ </b> <span>{{ $Product->origin->name }}</span></li>
+                            <li><b>Vận chuyển </b> <span><samp>Miễn phí vẫn chuyển</samp></span></li>
+                            <li><b>Cửa hàng </b> <span> {{ $Product->User->groupUser->name ?? '' }}</span></li>
+                        </ul>
                     </div>
 
                 </div>
@@ -119,11 +86,11 @@
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab"
-                                   aria-selected="true">Mô tả</a>
+                                    aria-selected="true">Mô tả</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
-                                   aria-selected="false">Bình luận <span></span></a>
+                                    aria-selected="false">Bình luận <span></span></a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -147,39 +114,35 @@
                                                     </div>
                                                     <div class="mt-3 d-flex flex-row align-items-center p-3 form-color">
                                                         <img src="https://i.imgur.com/zQZSWrt.jpg" width="50"
-                                                             class="rounded-circle mr-2">
+                                                            class="rounded-circle mr-2">
                                                         <input type="text" class="form-control" id="commentInput"
-                                                               placeholder="Enter your comment...">
+                                                            placeholder="Enter your comment...">
                                                         <button onclick="addComment()"
-                                                                class="btn btn-primary">Submit
-                                                        </button>
+                                                            class="btn btn-primary">Submit</button>
                                                     </div>
                                                     <div class="mt-2" id="commentsContainer">
                                                         @foreach($Product->comments as $item)
-                                                            @if($item->status == 1)
-                                                                <div class="d-flex flex-row p-3"><img
-                                                                        src="https://i.imgur.com/zQZSWrt.jpg" width="40"
-                                                                        height="40" class="rounded-circle mr-3">
-                                                                    <div class="w-100">
-                                                                        <div
-                                                                            class="d-flex justify-content-between align-items-center">
-                                                                            <div
-                                                                                class="d-flex flex-row align-items-center"> <span
-                                                                                    class="mr-2">{{$item->customer->fullname}}</span>
-                                                                            </div>
-                                                                            <small>{{$item->created_at}}</small>
-                                                                        </div>
-                                                                        <p class="text-justify comment-text mb-0">{{$item->content}}</p>
-                                                                        <div class="d-flex flex-row user-feed"> <span
-                                                                                class="wish"><i
-                                                                                    class="fa fa-heartbeat mr-2"></i>24</span>
-                                                                            <span
-                                                                                class="ml-3"><i
-                                                                                    class="fa fa-comments-o mr-2"></i>Reply</span>
-                                                                        </div>
-                                                                    </div>
+                                                        @if($item->status == 1)
+                                                        <div class="d-flex flex-row p-3"> <img
+                                                                src="https://i.imgur.com/zQZSWrt.jpg" width="40"
+                                                                height="40" class="rounded-circle mr-3">
+                                                            <div class="w-100">
+                                                                <div
+                                                                    class="d-flex justify-content-between align-items-center">
+                                                                    <div class="d-flex flex-row align-items-center"> <span
+                                                                            class="mr-2">{{$item->customer->fullname}}</span>  </div>
+                                                                    <small>{{$item->created_at}}</small>
                                                                 </div>
-                                                            @endif
+                                                                <p class="text-justify comment-text mb-0">{{$item->content}}</p>
+                                                                <div class="d-flex flex-row user-feed"> <span
+                                                                        class="wish"><i
+                                                                            class="fa fa-heartbeat mr-2"></i>24</span> <span
+                                                                        class="ml-3"><i
+                                                                            class="fa fa-comments-o mr-2"></i>Reply</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        @endif
                                                         @endforeach
                                                     </div>
                                                 </div>
@@ -212,7 +175,7 @@
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="product__item">
                             <div class="product__item__pic set-bg"
-                                 data-setbg="{{ asset('storage/' . $RelatedProduct->image) }}">
+                                data-setbg="{{ asset('storage/' . $RelatedProduct->image) }}">
                                 <ul class="product__item__pic__hover">
                                     <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
@@ -292,49 +255,18 @@
 
 @section('javascript')
     <script>
-        var productVariants = {!! json_encode( $Product->productVariant ) !!}
-        function selectVariant(element) {
-            var dataId = $(element).data('id');
-
-            var productVariant = productVariants.find(function(element) {
-                return element.id === dataId;
-            });
-            showVariant(JSON.parse(productVariant.variant_value))
-            console.log("productVariant:", productVariant);
-            console.log("Selected variant with data-id:", dataId);
-            $(element).parent().find('.btn').removeClass('active');
-            $(element).addClass('active');
-        }
-
-        function showVariant(variant) {
-            console.log("productVariant-json:", variant,toLabelValuePairs(variant));
-             var newInfo = toLabelValuePairs(variant);
-            $("#info-Variant").children("li").each(function(index){
-                // Lấy thông tin mới từ mảng newInfo
-                var newLabel = newInfo[index].label;
-                var newValue = newInfo[index].value;
-                  console.log(newLabel)
-                // Cập nhật nội dung của phần tử li
-                if(newLabel != 'image' && newLabel != 'price' &&newLabel != 'quantity' ) {
-                    $(this).html("<b>" + newLabel + "</b> <span>" + newValue + "</span>");
-                }
-            });
-        }
-
-        function toLabelValuePairs(obj) {
-            return Object.entries(obj).map(([label, value]) => {
-                return {label, value};
-            });
-        }
-
         function addComment1(data) {
 
 
-            // // Get the value of the input field
-            // var newCommentText = $('#commentInput').val();
 
-            // Create the new comment HTML
-            var newCommentHTML = `
+
+
+
+                // // Get the value of the input field
+                // var newCommentText = $('#commentInput').val();
+
+                // Create the new comment HTML
+                var newCommentHTML = `
                     <div class="d-flex flex-row p-3">
                         <img src="https://i.imgur.com/zQZSWrt.jpg" width="40" height="40" class="rounded-circle mr-3">
                         <div class="w-100">
@@ -353,11 +285,11 @@
                     </div>
                 `;
 
-            // Append the new comment to the comments container
-            $('#commentsContainer').append(newCommentHTML);
+                    // Append the new comment to the comments container
+                    $('#commentsContainer').append(newCommentHTML);
 
-            // Clear the input field
-            $('#commentInput').val('');
+                    // Clear the input field
+                    $('#commentInput').val('');
         }
 
         function addComment(id) {
@@ -377,7 +309,7 @@
                 type: "post",
                 url: url,
                 data: data,
-                success: function (res) {
+                success: function(res) {
                     console.log(res.status)
                     if (res.status == 200) {
                         addComment1(res.data);
