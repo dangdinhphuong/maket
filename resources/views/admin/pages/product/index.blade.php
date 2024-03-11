@@ -89,8 +89,8 @@
                         <td>{{ $product->namePro }}</td>
                         <td>{{ $product->category->nameCate }}</td>
                         <td>{{ $product->supplier->nameSupplier }}</td>
-                        <td>{{ number_format($product->cost, 0, ',', '.') . " VNĐ" }}</td>
-                        <td>{{ number_format($product->price, 0, ',', '.') . " VNĐ" }}</td>
+                        <td>{{ number_format($product->cost, 0, ',', '.') . " ₫" }}</td>
+                        <td>{{ number_format($product->price, 0, ',', '.') . " ₫" }}</td>
                         <td>{{ $product->quantity }}</td>
                         <td><span style="" class="btn {{$product->status==1?'btn-primary':'btn-danger'}} w-100">{{ App\Common\Constants::STATUS_PRODUCTS[$product->status] }}</span></td>
                         <td>

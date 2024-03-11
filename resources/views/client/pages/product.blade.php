@@ -35,16 +35,16 @@
                 <div class="col-lg-6 col-md-6">
                     <div class="product__details__pic">
                         <div class="product__details__pic__item">
-                            <img class="product__details__pic__item--large"
-                                 src="{{ asset('storage/' . $Product->image) }}" alt="" style="height: 500px">
+                            <img class="product__details__pic__item--large" src="{{ asset('storage/' . $Product->image) }}"
+                                alt="" style="height: 500px">
                         </div>
                         <div class="product__details__pic__slider owl-carousel">
-                            @if(count($Product->productImage) >1)
+                            @if (count($Product->productImage) > 1)
                                 <img data-imgbigurl="{{ asset('storage/' . $Product->image) }}"
-                                     src="{{ asset('storage/' . $Product->image) }}" alt="">
-                                @foreach($Product->productImage as $item)
+                                    src="{{ asset('storage/' . $Product->image) }}" alt="">
+                                @foreach ($Product->productImage as $item)
                                     <img data-imgbigurl="{{ asset('storage/' . $item->image) }}"
-                                         src="{{ asset('storage/' . $item->image) }}" alt="">
+                                        src="{{ asset('storage/' . $item->image) }}" alt="">
                                 @endforeach
                             @endif
                         </div>
@@ -64,35 +64,31 @@
                         </div>
                         @if (!empty($Product->minPiceProduct))
                             <div class="product__details__price">
-                                {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' VNĐ' }}
+                                {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' ₫' }}
                             </div>
                         @else
                             <div class="product__details__price">
-                                {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' VNĐ' }}
+                                {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' ₫' }}
                                 @if ($Product->discounts > 0)
-                                    <span>{{ number_format($Product->price, 0, ',', '.') . ' VNĐ' }}</span>
+                                    <span>{{ number_format($Product->price, 0, ',', '.') . ' ₫' }}</span>
                                 @endif
                             </div>
                         @endif
                         <ul id="info-Variant" style="padding-top: 0px; margin-top: 0px; margin-bottom: 2px">
-                            <li> <span style="background-color:  #ed1212"></span></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
-                            <li></li>
                         </ul>
                         <div class="card w-100 mb-2">
                             <div class="card-header">
                                 Phân loại
                             </div>
                             <div class="card-body">
-                                @foreach($Product->productVariant as $productVariant)
-                                <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}" onclick="selectVariant(this)">{{ $productVariant->variant_type }}</div>
+                                @foreach ($Product->productVariant as $productVariant)
+                                    @if ($productVariant->quantity < 1)
+                                        <div class="btn btn-outline-dark disabled">{{ $productVariant->variant_type }}
+                                        </div>
+                                    @else
+                                        <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}"
+                                            onclick="selectVariant(this)">{{ $productVariant->variant_type }}</div>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -101,29 +97,28 @@
                             @csrf
                             <div class="quantity">
                                 <div class="pro-qty">
-                                    <input type="text" id="quantity" value="1">
+                                    <input type="text" id="quantity" value="1" disabled>
                                 </div>
                             </div>
                         </div>
                         @if ($config->market_status == 0)
                             <button type="button" class="btn btn-danger">Xin lỗi chợ đã đóng</button>
                         @else
-                            <button class="primary-btn" onclick="addToCart({{ $Product->id }})"
+                            <button class="primary-btn" onclick="beforeAddToCart({{ $Product->id }})"
                                 {{ $Product->quantity <= 0 ? 'disabled' : '' }}>{{ $Product->quantity <= 0 ? 'Sản phẩm đã hết hàng' : 'Thêm vào giỏ hàng' }}</button>
                         @endif
                     </div>
-
                 </div>
                 <div class="col-lg-12">
                     <div class="product__details__tab">
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab"
-                                   aria-selected="true">Mô tả</a>
+                                    aria-selected="true">Mô tả</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
-                                   aria-selected="false">Bình luận <span></span></a>
+                                    aria-selected="false">Bình luận <span></span></a>
                             </li>
                         </ul>
                         <div class="tab-content">
@@ -147,16 +142,15 @@
                                                     </div>
                                                     <div class="mt-3 d-flex flex-row align-items-center p-3 form-color">
                                                         <img src="https://i.imgur.com/zQZSWrt.jpg" width="50"
-                                                             class="rounded-circle mr-2">
+                                                            class="rounded-circle mr-2">
                                                         <input type="text" class="form-control" id="commentInput"
-                                                               placeholder="Enter your comment...">
-                                                        <button onclick="addComment()"
-                                                                class="btn btn-primary">Submit
+                                                            placeholder="Enter your comment...">
+                                                        <button onclick="addComment()" class="btn btn-primary">Submit
                                                         </button>
                                                     </div>
                                                     <div class="mt-2" id="commentsContainer">
-                                                        @foreach($Product->comments as $item)
-                                                            @if($item->status == 1)
+                                                        @foreach ($Product->comments as $item)
+                                                            @if ($item->status == 1)
                                                                 <div class="d-flex flex-row p-3"><img
                                                                         src="https://i.imgur.com/zQZSWrt.jpg" width="40"
                                                                         height="40" class="rounded-circle mr-3">
@@ -164,17 +158,18 @@
                                                                         <div
                                                                             class="d-flex justify-content-between align-items-center">
                                                                             <div
-                                                                                class="d-flex flex-row align-items-center"> <span
-                                                                                    class="mr-2">{{$item->customer->fullname}}</span>
+                                                                                class="d-flex flex-row align-items-center">
+                                                                                <span
+                                                                                    class="mr-2">{{ $item->customer->fullname }}</span>
                                                                             </div>
-                                                                            <small>{{$item->created_at}}</small>
+                                                                            <small>{{ $item->created_at }}</small>
                                                                         </div>
-                                                                        <p class="text-justify comment-text mb-0">{{$item->content}}</p>
+                                                                        <p class="text-justify comment-text mb-0">
+                                                                            {{ $item->content }}</p>
                                                                         <div class="d-flex flex-row user-feed"> <span
                                                                                 class="wish"><i
                                                                                     class="fa fa-heartbeat mr-2"></i>24</span>
-                                                                            <span
-                                                                                class="ml-3"><i
+                                                                            <span class="ml-3"><i
                                                                                     class="fa fa-comments-o mr-2"></i>Reply</span>
                                                                         </div>
                                                                     </div>
@@ -212,7 +207,7 @@
                     <div class="col-lg-3 col-md-4 col-sm-6">
                         <div class="product__item">
                             <div class="product__item__pic set-bg"
-                                 data-setbg="{{ asset('storage/' . $RelatedProduct->image) }}">
+                                data-setbg="{{ asset('storage/' . $RelatedProduct->image) }}">
                                 <ul class="product__item__pic__hover">
                                     <li><a href="#"><i class="fa fa-heart"></i></a></li>
                                     <li><a href="#"><i class="fa fa-retweet"></i></a></li>
@@ -225,7 +220,7 @@
                                         href="{{ route('product', ['slug' => $RelatedProduct->slug]) }}">{{ $RelatedProduct->namePro }}</a>
                                 </h6>
                                 <b>
-                                    {{ number_format($RelatedProduct->price - ($RelatedProduct->price * $RelatedProduct->discounts) / 100, 0, ',', '.') . ' VNĐ' }}</b>
+                                    {{ number_format($RelatedProduct->price - ($RelatedProduct->price * $RelatedProduct->discounts) / 100, 0, ',', '.') . ' ₫' }}</b>
                             </div>
                         </div>
                     </div>
@@ -292,38 +287,80 @@
 
 @section('javascript')
     <script>
-        var productVariants = {!! json_encode( $Product->productVariant ) !!}
+        var productVariants = {!! json_encode($Product->productVariant) !!}
+        var productVariant = '';
+        var productQuantity = {!! $Product->quantity !!};
+
+        function beforeAddToCart(id) {
+            if (productVariants.length > 0) {
+                if (productVariant != '') {
+                    addToCart(id, productVariant);
+                } else {
+                    swal("Vui lòng chọn phân loại", {
+                        icon: "error",
+                    });
+                }
+            } else {
+                addToCart(id);
+            }
+
+        }
+        // function beforeAddToCart(id) {
+        //     // if (productVariants.length > 0) {
+        //     //     if(productVariant != ''){
+        //     //         addToCart(id, productVariant);
+        //     //     }else{
+        //     //         swal("Vui lòng chọn phân loại", {
+        //     //         icon: "error",
+        //     //     });
+        //     //     }
+        //     // } else {
+        //     //     addToCart(id);
+        //     // }
+
+        // }
+
         function selectVariant(element) {
             var dataId = $(element).data('id');
 
-            var productVariant = productVariants.find(function(element) {
+            productVariant = productVariants.find(function(element) {
                 return element.id === dataId;
             });
+            productQuantity = productVariant['quantity'];
             showVariant(JSON.parse(productVariant.variant_value))
-            console.log("productVariant:", productVariant);
+            console.log("productVariant:", this.productVariant);
             console.log("Selected variant with data-id:", dataId);
             $(element).parent().find('.btn').removeClass('active');
             $(element).addClass('active');
         }
 
         function showVariant(variant) {
-            console.log("productVariant-json:", variant,toLabelValuePairs(variant));
-             var newInfo = toLabelValuePairs(variant);
-            $("#info-Variant").children("li").each(function(index){
-                // Lấy thông tin mới từ mảng newInfo
-                var newLabel = newInfo[index].label;
-                var newValue = newInfo[index].value;
-                  console.log(newLabel)
-                // Cập nhật nội dung của phần tử li
-                if(newLabel != 'image' && newLabel != 'price' &&newLabel != 'quantity' ) {
-                    $(this).html("<b>" + newLabel + "</b> <span>" + newValue + "</span>");
+            $('#quantity').val(1)
+            var newInfo = toLabelValuePairs(variant);
+            variantHtml = ``;
+            for (var key in newInfo) {
+                if (newInfo.hasOwnProperty(key)) {
+                    if (newInfo[key].label == 'color') {
+                        variantHtml += `<li><b>${newInfo[key].label}</b> <span style="background-color: ${newInfo[key].value};">${newInfo[key].value}</span></li>`;
+                    }
+                    else if (newInfo[key].label != 'image' && newInfo[key].label != 'price') {
+                        variantHtml += `<li><b>${newInfo[key].label}</b> <span>${newInfo[key].value}</span></li>`;
+                    }
                 }
-            });
+            }
+            var number = productVariant.price;
+            var formattedNumber = number.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+            $('.product__details__price').text(formattedNumber)
+            $('#info-Variant').empty();
+            $('#info-Variant').append(variantHtml);
         }
 
         function toLabelValuePairs(obj) {
             return Object.entries(obj).map(([label, value]) => {
-                return {label, value};
+                return {
+                    label,
+                    value
+                };
             });
         }
 
@@ -377,7 +414,7 @@
                 type: "post",
                 url: url,
                 data: data,
-                success: function (res) {
+                success: function(res) {
                     console.log(res.status)
                     if (res.status == 200) {
                         addComment1(res.data);
@@ -390,5 +427,31 @@
                 }
             });
         }
+
+        /*-------------------
+        		Quantity change
+        	--------------------- */
+        var proQty = $('.pro-qty');
+        proQty.prepend('<span class="dec qtybtn">-</span>');
+        proQty.append('<span class="inc qtybtn">+</span>');
+        proQty.on('click', '.qtybtn', function() {
+            var $button = $(this);
+            var newVal = oldValue = $button.parent().find('input').val();
+            if (productVariants.length > 0) {
+                if (productVariant == '') {
+                    swal("Vui lòng chọn phân loại", {
+                        icon: "error",
+                    });
+                    return false;
+                }
+            }
+            if ($button.hasClass('inc') && productQuantity >= parseFloat(oldValue) + 1) {
+                newVal = parseFloat(oldValue) + 1;
+            } else if ($button.hasClass('dec') && parseFloat(oldValue) - 1 > 0) {
+                // Don't allow decrementing below zero
+                newVal = parseFloat(oldValue) - 1;
+            }
+            $button.parent().find('input').val(newVal);
+        });
     </script>
 @endsection

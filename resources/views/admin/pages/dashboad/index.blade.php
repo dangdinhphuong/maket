@@ -187,7 +187,7 @@
                                     <td>{{ $item->user[0]->fullname ?? '' }}</td>
                                     <td>{{ isset($item->user[0]) && $item->user[0]->orderDetail ? count($item->user[0]->orderDetail) : 0 }}</td>
                                     <td>{{ isset($item->user[0]) && $item->user[0]->products ? count($item->user[0]->products) : 0 }}</td>
-                                    <td>{{ number_format($totalShop, 0, ',', '.') . " VNĐ" }}</td>
+                                    <td>{{ number_format($totalShop, 0, ',', '.') . " ₫" }}</td>
                                     <td><span style="" class="btn {{ ($item->user[0]->status ?? 0) == 1 ? 'btn-primary' : 'btn-danger' }} w-100">
                                             {{ App\Common\Constants::STATUS_PRODUCTS[$item->user[0]->status ?? 0] }}</span>
                                     </td>
@@ -246,8 +246,8 @@
                             <tr id="pro{{ $product->id }}">
                                 <td>{{ $product->id }}</td>
                                 <td>{{ $product->namePro }}</td>
-                                <td>{{ number_format($product->cost, 0, ',', '.') . " VNĐ" }}</td>
-                                <td>{{ number_format($product->price, 0, ',', '.') . " VNĐ" }}</td>
+                                <td>{{ number_format($product->cost, 0, ',', '.') . " ₫" }}</td>
+                                <td>{{ number_format($product->price, 0, ',', '.') . " ₫" }}</td>
                                 <td>{{ $product->quantity }}</td>
                                 <td><span style="" class="btn {{$product->status==1?'btn-primary':'btn-danger'}} w-100">{{ App\Common\Constants::STATUS_PRODUCTS[$product->status] }}</span></td>
                             </tr>
@@ -304,13 +304,13 @@
                             <td>{{ $item->name }}</td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ App\Common\Constants::STATUS_ORDER[$item->status] }}</td>
-                            <td>{{ $item->status != 6 ? number_format($item->price, 0, ',', '.') . " VNĐ" :0 }}</td>
+                            <td>{{ $item->status != 6 ? number_format($item->price, 0, ',', '.') . " ₫" :0 }}</td>
                         </tr>
                         @endforeach
                         <tr>
                             <th colspan="5">
-                                <b>Tồng tiền dự kiến</b> : {{ number_format($expectedTotalAmount, 0, ',', '.') . " VNĐ" }} <br>
-                                <b>Tồng tiền đã nhận</b> : {{ number_format($totalAmountReceived, 0, ',', '.') . " VNĐ" }}
+                                <b>Tồng tiền dự kiến</b> : {{ number_format($expectedTotalAmount, 0, ',', '.') . " ₫" }} <br>
+                                <b>Tồng tiền đã nhận</b> : {{ number_format($totalAmountReceived, 0, ',', '.') . " ₫" }}
                             </th>
                         </tr>
                         </tbody>

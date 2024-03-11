@@ -46,13 +46,13 @@
                         </div>
                         @if (!empty($Product->minPiceProduct))
                         <div class="product__details__price">
-                            {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' VNĐ' }}
+                            {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' ₫' }}
                         </div>
                     @else
                         <div class="product__details__price">
-                            {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' VNĐ' }}
+                            {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' ₫' }}
                             @if ($Product->discounts > 0)
-                                <span>{{ number_format($Product->price, 0, ',', '.') . ' VNĐ' }}</span>
+                                <span>{{ number_format($Product->price, 0, ',', '.') . ' ₫' }}</span>
                             @endif
                         </div>
                         @endif
@@ -188,7 +188,7 @@
                                         href="{{ route('product', ['slug' => $RelatedProduct->slug]) }}">{{ $RelatedProduct->namePro }}</a>
                                 </h6>
                                 <b>
-                                    {{ number_format($RelatedProduct->price - ($RelatedProduct->price * $RelatedProduct->discounts) / 100, 0, ',', '.') . ' VNĐ' }}</b>
+                                    {{ number_format($RelatedProduct->price - ($RelatedProduct->price * $RelatedProduct->discounts) / 100, 0, ',', '.') . ' ₫' }}</b>
                             </div>
                         </div>
                     </div>

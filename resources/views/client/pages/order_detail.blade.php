@@ -31,7 +31,7 @@
                                     <h5>{{$Order->name}}</h5>
                                 </td>
                                 <td>
-                                    <h5> {{ number_format($Order->price, 0, ',', '.') . " VNĐ"   }}</h5>
+                                    <h5> {{ number_format($Order->price, 0, ',', '.') . " ₫"   }}</h5>
                                 </td>
                                 <td>
                                     <h5> {{$Order->quantity}}</h5>
@@ -41,7 +41,7 @@
                                     <h5> {{ App\Common\Constants::STATUS_ORDER[$Order->status] }}</h5>
                                 </td>
                                 <td>
-                                    <h5> {{ number_format($Order->price * $Order->quantity, 0, ',', '.') . " VNĐ"   }}</h5>
+                                    <h5> {{ number_format($Order->price * $Order->quantity, 0, ',', '.') . " ₫"   }}</h5>
                                 </td>
                                 @if($Order->status < 2)
                                 <td>
@@ -58,9 +58,9 @@
                 <div class="shoping__checkout">
                     <h5>Hóa đơn</h5>
                     <ul>
-                        <li>Tổng tiền tạm tính <span>{{ number_format($provisionalMoney, 0, ',', '.') . " VNĐ"   }}</span></li>
-                        <li>Giảm giá <span> - {{ number_format($provisionalMoney - $totalPrice, 0, ',', '.') . " VNĐ"   }}</span></li>
-                        <li>Tổng tiền thanh toán <span>{{ number_format($totalPrice, 0, ',', '.') . " VNĐ"   }}</span></li>
+                        <li>Tổng tiền tạm tính <span>{{ number_format($provisionalMoney, 0, ',', '.') . " ₫"   }}</span></li>
+                        <li>Giảm giá <span> - {{ number_format($provisionalMoney - $totalPrice, 0, ',', '.') . " ₫"   }}</span></li>
+                        <li>Tổng tiền thanh toán <span>{{ number_format($totalPrice, 0, ',', '.') . " ₫"   }}</span></li>
                         <li>Phương thức thanh toán <span>Thanh toán khi nhân hàng</span></li>
                         <li>Trạng thái <span>{{ App\Common\Constants::STATUS_ORDER[$Orders->status] }}</span></li>
                     </ul>

@@ -53,7 +53,7 @@
                     <tr id="cate{{ $Order->id }}">
                     <td>{{ $Order->id }}</td>
                         <td>{{ $Order->name }}</td>
-                        <td> {{ number_format($Order->price, 0, ',', '.') . " VNĐ"   }}</td>
+                        <td> {{ number_format($Order->price, 0, ',', '.') . " ₫"   }}</td>
                         <td>{{ App\Common\Constants::STATUS_ORDER[$Order->status] }}</td>
                         <td>{{ $Order->created_at }}</td>
                         <td>

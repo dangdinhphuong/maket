@@ -31,7 +31,7 @@
                                             <h5>{{$cart->products->namePro}}</h5>
                                         </td>
                                         <td style="width: 30%;" class=" shoping__cart__price">
-                                            {{ number_format(ceil($cart->products->price-(($cart->products->price * $cart->products->discounts )/100)), 0, ',', '.') . " VNĐ"   }}
+                                            {{ number_format(ceil($cart->products->price-(($cart->products->price * $cart->products->discounts )/100)), 0, ',', '.') . " ₫"   }}
                                         </td>
                                         <td class="shoping__cart__quantity">
                                             <div class="quantity">
@@ -66,8 +66,8 @@
                     <div class="shoping__checkout">
                         <h5>Tổng số giỏ hàng</h5>
                         <ul>
-                            <li>Tạm tính <span>{{number_format(ceil($totalMoney), 0, ',', '.') . " VNĐ"}}</span></li>
-                            <li>Tổng tiền <span>{{number_format(ceil($totalMoney), 0, ',', '.') . " VNĐ"}}</span></li>
+                            <li>Tạm tính <span>{{number_format(ceil($totalMoney), 0, ',', '.') . " ₫"}}</span></li>
+                            <li>Tổng tiền <span>{{number_format(ceil($totalMoney), 0, ',', '.') . " ₫"}}</span></li>
                         </ul>
                         <a id="{{ $carts->count() <=0 ? 'checkout1' : '' }}"
                            href="{{ $carts->count() <=0 ? '#' : route('payment') }}"
@@ -96,6 +96,7 @@
                 button: "OK",
             })
         });
+        
     </script>
     @endif
 @endsection

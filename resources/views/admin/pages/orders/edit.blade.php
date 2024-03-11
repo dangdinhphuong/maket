@@ -57,7 +57,7 @@
                 <tbody>
                     <td>{{$Order->id}}</td>
                     <td>{{$Order->name}}</td>
-                    <td> {{ number_format($Order->price, 0, ',', '.') . " VNĐ"   }}</td>
+                    <td> {{ number_format($Order->price, 0, ',', '.') . " ₫"   }}</td>
                     <td>{{$Order->quantity}}</td>
                     <td>
                         <select class="custom-select" name="status" id="statusSelect0-{{$Order->id}}" onchange="changeStatus({{$Order->id}})">
@@ -66,7 +66,7 @@
                             @endforeach
                         </select>
                     </td>
-                    <td> {{ number_format($Order->price * $Order->quantity, 0, ',', '.') . " VNĐ"   }}</td>
+                    <td> {{ number_format($Order->price * $Order->quantity, 0, ',', '.') . " ₫"   }}</td>
 
                     </tr>
                 </tbody>
@@ -87,7 +87,7 @@
         <div class="shoping__checkout">
             <h5>Hóa đơn</h5>
             <ul>
-                <li>Tổng tiền thanh toán: <span style="  color:red;">{{ number_format($totalPrice, 0, ',', '.') . " VNĐ"   }}</span></li>
+                <li>Tổng tiền thanh toán: <span style="  color:red;">{{ number_format($totalPrice, 0, ',', '.') . " ₫"   }}</span></li>
                 <li>Phương thức thanh toán: <span style="  color:red;">Thanh toán khi nhân hàng</span></li>
             </ul>
         </div>

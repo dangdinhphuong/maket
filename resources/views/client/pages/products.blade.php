@@ -256,13 +256,13 @@
                                         </h5>
                                         @if (!empty($product->minPiceProduct))
                                             <div class="product__item__price">
-                                                {{ number_format($product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($product->maxPriceProduct, 0, ',', '.') . ' VNĐ' }}
+                                                {{ number_format($product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($product->maxPriceProduct, 0, ',', '.') . ' ₫' }}
                                             </div>
                                         @else
                                             <div class="product__item__price">
-                                                {{ number_format($product->price-($product->price * $product->discounts) / 100, 0, ',', '.') . ' VNĐ' }}
+                                                {{ number_format($product->price-($product->price * $product->discounts) / 100, 0, ',', '.') . ' ₫' }}
                                                 @if ($product->discounts > 0)
-                                                    <span>{{ number_format($product->price, 0, ',', '.') . ' VNĐ' }}</span>
+                                                    <span>{{ number_format($product->price, 0, ',', '.') . ' ₫' }}</span>
                                                 @endif
                                             </div>
                                         @endif

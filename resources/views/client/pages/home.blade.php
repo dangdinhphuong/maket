@@ -78,10 +78,10 @@
                             <h5><a href="{{ route('product',['slug'=>$category[$i]->products[$y]->slug]) }}">{{$category[$i]->products[$y]->namePro}}</a></h5>
                             <div class="product__item__price">
                                 @if($category[$i]->products[$y]->discounts > 0)
-                                {{ number_format(($category[$i]->products[$y]->price-(($category[$i]->products[$y]->price * $category[$i]->products[$y]->discounts )/100)), 0, ',', '.') . " VNĐ"   }}
-                                <span>{{ number_format($category[$i]->products[$y]->price, 0, ',', '.') . " VNĐ" }} a</span>
+                                {{ number_format(($category[$i]->products[$y]->price-(($category[$i]->products[$y]->price * $category[$i]->products[$y]->discounts )/100)), 0, ',', '.') . " ₫"   }}
+                                <span>{{ number_format($category[$i]->products[$y]->price, 0, ',', '.') . " ₫" }} a</span>
                                 @else
-                                <span>{{ number_format($category[$i]->products[$y]->price, 0, ',', '.') . " VNĐ" }} b</span>
+                                <span>{{ number_format($category[$i]->products[$y]->price, 0, ',', '.') . " ₫" }} b</span>
                                 @endif
                             </div>
                         </div>
