@@ -83,7 +83,7 @@
                             <div class="card-body">
                                 @foreach ($Product->productVariant as $productVariant)
                                     @if ($productVariant->quantity < 1)
-                                        <div class="btn btn-outline-dark disabled">{{ $productVariant->variant_type }}
+                                        <div class="btn btn-outline-dark disabled" style="    background-color: #d308084a;" >{{ $productVariant->variant_type }}
                                         </div>
                                     @else
                                         <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}"
