@@ -330,10 +330,11 @@ class ClientController extends Controller
 
     public function carts()
     {
-        $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
-        $carts->load('user')->load('products');
-
-
+        $carts = Cart::where('customer_id', auth()->user()->id)
+        ->orderBy('id', 'DESC')
+        ->with(['user','products','productVariant'])
+        ->get();
+    
         $totalMoney = 0;
         foreach ($carts as $cart) {
             $totalMoney += ceil(($cart->products->price - ($cart->products->price * $cart->products->discounts) / 100) * $cart->quantity);
