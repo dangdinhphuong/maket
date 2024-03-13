@@ -334,7 +334,7 @@ class ClientController extends Controller
         ->orderBy('id', 'DESC')
         ->with(['user','products','productVariant'])
         ->get();
-    
+
         $totalMoney = 0;
         foreach ($carts as $cart) {
             $totalMoney += ceil(($cart->products->price - ($cart->products->price * $cart->products->discounts) / 100) * $cart->quantity);
@@ -372,6 +372,94 @@ class ClientController extends Controller
             }
         }
         return redirect()->back();
+    }
+
+    public function updateProductCarts(Request $request, $product_id)
+    {
+        $data = $request->all();
+        dd($data);
+        $productQuantity = 0;
+        $productVariantId = null;
+        $quantity = request(['quantity']) ? (int)request()->quantity : 1;
+
+        $config = config::first();
+        if ($config->market_status == 0) {
+            return response()->json([
+                'message' => "Xin lỗi phiên chợ đã đóng ",
+                'status' => "error"
+            ]);
+        }
+        $Product = Product::with(['productVariant'])
+            ->where('id', $product_id)
+            ->where('status', 1)
+            ->first();
+
+        $CartQuery = Cart::where('product_id', $product_id)
+            ->where('customer_id', auth()->user()->id);
+
+        if (!empty($data['productVariant'])) {
+            $CartQuery->where('product_variant_id', $data['productVariant']['id']);
+        }
+
+        $Cart = $CartQuery->first();
+
+
+        // return [$data['productVariant']['id'], $Product,$Cart];
+        try {
+            DB::beginTransaction();
+            if (!empty($data['productVariant'])) {
+                $dataProductVariant =  $data['productVariant'];
+                $productQuantity =  (int)$dataProductVariant["quantity"];
+                $productVariantId = (int)$dataProductVariant["id"];
+                $productVariantById = ProductVariant::find($productVariantId);
+                if(!empty($productVariantById )){
+                    $newQuantity =  $productVariantById->quantity - $productQuantity;
+                    $productVariantById->update(['quantity'=>  $newQuantity]) ;
+                }
+            } else {
+                $productQuantity =  $Product->quantity;
+                $newQuantity =  $productQuantity - $quantity;
+                $Product->update(['quantity'=>  $newQuantity]) ;
+            }
+            if (!$Product) { // kiểm tra xem sản phẩm có tồn tại
+                return response()->json([
+                    'message' => "Không tìm thấy sản phẩm",
+                    'status' => "error"
+                ], $status = 401);
+            }
+
+            // check Sản phẩm hiện đã hết hàng
+            if ($productQuantity <= 0) {
+                return response()->json([
+                    'message' => "Sản phẩm hiện đã hết hàng",
+                    'status' => "error"
+                ]);
+            }
+            // check số lượng san phẩm mua với số lượng hàng tồn kho
+            if ($productQuantity < $quantity) {
+                return response()->json([
+                    'message' => "Sản phẩm hiện tại không còn đủ so với số lượng mua yêu cầu",
+                    'status' => "error"
+                ], $status = 401);
+            }
+
+            if (!empty($Cart)) { // kiểm tra xem sản phẩm đã có trong giỏ hàng chưa nếu có r thì update thêm sl sản phẩm
+                $quantitys = (int)$Cart->quantity + $quantity;
+                $Cart->update(['quantity' => $quantitys]);
+            } else {
+                $data = array_merge(['customer_id' => auth()->user()->id, 'product_id' => $product_id, 'quantity' => $quantity, 'product_variant_id' => $productVariantId]);
+                Cart::create($data);
+            }
+            DB::commit();
+            return response()->json([
+                'message' => "Mua hàng thành công",
+                'status' => "success"
+            ]);
+        } catch (Exception $exception) {
+            DB::rollBack();
+            Log::error('message :', $exception->getMessage() . '--line :' . $exception->getLine());
+            return redirect()->route('cp-admin.products.index')->with('error', 'Thêm sản phẩm thất bại !');
+        }
     }
 
     public function savePayment(Request $request)

@@ -35,6 +35,41 @@ function addToCart(id, productVariant = []) { // thêm sản phẩm có sô lư�
 
 
     }
+function updateProductCarts(id,quantity) { // thêm sản phẩm có sô lượng
+    let _token = $("input[name=_token]").val();
+    let url = "/api/add-to-cart/" + id;
+    let data = { quantity, _token };
+    if (quantity <= 0) {
+        swal("Số lượng tối thiểu là 1", {
+            icon: "error",
+        })
+        return false;
+    }
+    $.ajax({
+        type: "post",
+        url: url,
+        data: data,
+        success: function (res) {
+            swal(res.message, {
+                icon: res.status,
+                timer: 1000
+            });
+        },
+        error: function (response) {
+            console.log('response', response.responseJSON)
+            if (response.responseJSON.message) {
+                swal(response.responseJSON.message, {
+                    icon: response.responseJSON.status,
+                });
+            }
+            else swal(response.message, {
+                icon: response.status,
+            });
+        },
+    });
+
+
+}
 
     function addCart(id) { // thêm sản phẩm măc định sô lượng là 1
 

@@ -189,6 +189,7 @@ Route::get('blog/{slug}', [ClientController::class, 'blog'])->name('blog');
 
 // check login
 Route::get('carts', [ClientController::class, 'carts'])->middleware('clientLogin')->name('carts');
+Route::post('update-product-carts/{product_id}', [ClientController::class, 'updateProductCarts'])->middleware('clientLogin')->name('updateProductCarts');
 Route::get('payment', [ClientController::class, 'payment'])->middleware('clientLogin')->name('payment');
 Route::get('payment-vnpay', [ClientController::class, 'savePayment'])->middleware('clientLogin')->name('payment-vnpay');
 Route::post('check-voucher', [ClientController::class, 'checkVoucher'])->middleware('clientLogin');
@@ -208,6 +209,7 @@ Route::name('api.')->middleware('ApiclientLogin')->prefix('api/')->group(functio
     Route::post('add-to-cart/{product_id}', [ClientController::class, 'addCart'])->name('addCart');
     // id sản phẩm|| sl sản phẩm mặc định là 1
     Route::get('add-cart/{product_id}', [ClientController::class, 'addCart'])->name('addCart');
+    Route::post('update-product-carts/{product_id}', [ClientController::class, 'updateProductCarts'])->middleware('clientLogin')->name('updateProductCarts');
     Route::get('remove-cart/{product_id}', [ClientController::class, 'removeCart'])->name('removeCart');
 });
 
