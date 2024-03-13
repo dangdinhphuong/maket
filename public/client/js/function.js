@@ -11,41 +11,6 @@ function addToCart(id, productVariant = []) { // thêm sản phẩm có sô lư�
         return false;
     }
     $.ajax({
-            type: "post",
-            url: url,
-            data: data,
-            success: function (res) {
-                swal(res.message, {
-                    icon: res.status,
-                    timer: 1000
-                });
-            },
-            error: function (response) {
-                console.log('response', response.responseJSON)
-                if (response.responseJSON.message) {
-                    swal(response.responseJSON.message, {
-                        icon: response.responseJSON.status,
-                    });
-                }
-                else swal(response.message, {
-                    icon: response.status,
-                });
-            },
-        });
-
-
-    }
-function updateProductCarts(id,quantity) { // thêm sản phẩm có sô lượng
-    let _token = $("input[name=_token]").val();
-    let url = "/api/add-to-cart/" + id;
-    let data = { quantity, _token };
-    if (quantity <= 0) {
-        swal("Số lượng tối thiểu là 1", {
-            icon: "error",
-        })
-        return false;
-    }
-    $.ajax({
         type: "post",
         url: url,
         data: data,
@@ -71,62 +36,108 @@ function updateProductCarts(id,quantity) { // thêm sản phẩm có sô lượn
 
 }
 
-    function addCart(id) { // thêm sản phẩm măc định sô lượng là 1
-
-        let url = "/api/add-cart/" + id;
-        $.ajax({
-            type: "get",
-            url: url,
-            success: function (res) {
-                console.log('res', res)
+function updateProductCarts(id, quantity, callback) { // thêm sản phẩm có sô lượng
+    let _token = $("input[name=_token]").val();
+    let url = "/api/update-product-carts/" + id;
+    let data = { quantity, _token };
+    if (quantity <= 0) {
+        swal("Số lượng tối thiểu là 1", {
+            icon: "error",
+        });
+        callback(false);
+        return;
+    }
+    $.ajax({
+        type: "post",
+        url: url,
+        data: data,
+        success: function (res) {
+            if (res.status === "success") {
                 swal(res.message, {
                     icon: res.status,
-                    timer: 2000
+                    timer: 1000
                 });
-            },
-            error: function (response) {
-                console.log('response', response.responseJSON)
-                if (response.responseJSON.message) {
-                    swal(response.responseJSON.message, {
-                        icon: response.responseJSON.status,
-                    });
-                }
-                else swal(response.message, {
-                    icon: response.status,
-                });
-            },
-        });
-
-
-    }
-
-    function removeCart(id) { // xóa sản phẩm theo id trong giỏ hàng
-
-        let url = "/api/remove-cart/" + id;
-        $.ajax({
-            type: "get",
-            url: url,
-            success: function (res) {
-                console.log('res', res)
+                callback(true);
+            } else {
                 swal(res.message, {
                     icon: res.status,
-                    timer: 2000
-                }).then(function () {
-                    $("#pro" + id).remove();
                 });
-            },
-            error: function (response) {
-                console.log('response', response.responseJSON)
-                if (response.responseJSON.message) {
-                    swal(response.responseJSON.message, {
-                        icon: response.responseJSON.status,
-                    });
-                }
-                else swal(response.message, {
-                    icon: response.status,
+                callback(false);
+            }
+        },
+        error: function (response) {
+            console.log('response', response.responseJSON);
+            if (response.responseJSON.message) {
+                swal(response.responseJSON.message, {
+                    icon: response.responseJSON.status,
                 });
-            },
-        });
+            }
+            else swal(response.message, {
+                icon: response.status,
+            });
+            callback(false);
+        },
+    });
+}
 
 
-    }
+
+function addCart(id) { // thêm sản phẩm măc định sô lượng là 1
+
+    let url = "/api/add-cart/" + id;
+    $.ajax({
+        type: "get",
+        url: url,
+        success: function (res) {
+            console.log('res', res)
+            swal(res.message, {
+                icon: res.status,
+                timer: 2000
+            });
+        },
+        error: function (response) {
+            console.log('response', response.responseJSON)
+            if (response.responseJSON.message) {
+                swal(response.responseJSON.message, {
+                    icon: response.responseJSON.status,
+                });
+            }
+            else swal(response.message, {
+                icon: response.status,
+            });
+        },
+    });
+
+
+}
+
+function removeCart(id) { // xóa sản phẩm theo id trong giỏ hàng
+
+    let url = "/api/remove-cart/" + id;
+    $.ajax({
+        type: "get",
+        url: url,
+        success: function (res) {
+            console.log('res', res)
+            swal(res.message, {
+                icon: res.status,
+                timer: 2000
+            }).then(function () {
+                $("#pro" + id).remove();
+            });
+        },
+        error: function (response) {
+            console.log('response', response.responseJSON)
+            if (response.responseJSON.message) {
+                swal(response.responseJSON.message, {
+                    icon: response.responseJSON.status,
+                });
+            }
+            else swal(response.message, {
+                icon: response.status,
+            });
+        },
+    });
+
+
+}

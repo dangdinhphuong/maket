@@ -11,12 +11,10 @@
                         <table>
                             <thead>
                             <tr>
-                                <th class="shoping__product">Sản phẩm</th>
-                                <th>Số lượng</th>
-                                <th>Giá</th>
-                                <th>Giảm giá</th>
-                                <th>Tổng tiền</th>
-                                <th></th>
+                                <th scope="col">Sản phẩm</th>
+                                <th scope="col">Đơn giá</th>
+                                <th scope="col">Số lượng</th>
+                                <th scope="col">Tổng tiền</th>
                             </tr>
                             </thead>
                             <form name="updateCarts" action="{{route('updateCarts')}}" method="post">
@@ -30,17 +28,14 @@
                                         <td>
                                             <h5>{{$cart->products->namePro}}</h5>
                                         </td>
+                                        <td >
+                                            {{ number_format(ceil($cart->productVariant->price), 0, ',', '.') . ' ₫' }}
+                                        </td>
                                         <td>
                                             <h5>{{$cart->quantity}}</h5>
                                         </td>
-                                        <td >
-                                            {{ number_format($price , 0, ',', '.') . " ₫"   }}
-                                        </td>
-                                        <td id="sale-{{ $cart->id  }}">
-                                            {{ number_format(0 , 0, ',', '.') . " ₫"   }}
-                                        </td>
                                         <td id="totalPrice-{{ $cart->id  }}">
-                                            {{ number_format($price*$cart->quantity , 0, ',', '.') . " ₫"   }}
+                                            {{ number_format($cart->productVariant->price * $cart->quantity , 0, ',', '.') . " ₫"   }}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -112,7 +107,7 @@
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="exampleRadios" id="vnpay" value="option2">
+                                            <input class="form-check-input" type="radio" name="exampleRadios" id="vnpay" value="card">
                                             <label class="form-check-label" for="exampleRadios2">
                                                Thanh toán vnpay
                                             </label>

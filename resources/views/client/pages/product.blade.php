@@ -305,21 +305,6 @@
             }
 
         }
-        // function beforeAddToCart(id) {
-        //     // if (productVariants.length > 0) {
-        //     //     if(productVariant != ''){
-        //     //         addToCart(id, productVariant);
-        //     //     }else{
-        //     //         swal("Vui lòng chọn phân loại", {
-        //     //         icon: "error",
-        //     //     });
-        //     //     }
-        //     // } else {
-        //     //     addToCart(id);
-        //     // }
-
-        // }
-
         function selectVariant(element) {
             var dataId = $(element).data('id');
 
