@@ -26,7 +26,8 @@ class StoreProductRequest extends FormRequest
         return [
              'namePro'=>'required|min:3|max:100|unique:products,namePro',
              'slug'=>'required|min:3|max:100|unique:products,slug',
-             'image'=>'required|mimes:jpg,bmp,png|max:2048',
+             'image'=>'required|array|min:1|max:5', // Kiểm tra nếu là một mảng ảnh và tối đa 5 ảnh
+             'image.*'=>'image|mimes:jpg,bmp,png|max:2048', // Kiểm tra từng ảnh trong mảng
              'quantity' => 'required|numeric|min:0',
              'price' => 'required|numeric|min:1',
              'cost' => 'required|numeric|min:1',

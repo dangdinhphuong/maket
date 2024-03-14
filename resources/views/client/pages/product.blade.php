@@ -86,7 +86,7 @@
                                         <div class="btn btn-outline-dark disabled" style="    background-color: #d308084a;" >{{ $productVariant->variant_type }}
                                         </div>
                                     @else
-                                        <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}"
+                                        <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}" data-image="{{ asset('storage/' . json_decode($productVariant->variant_value,true)["image"]) }}"
                                             onclick="selectVariant(this)">{{ $productVariant->variant_type }}</div>
                                     @endif
                                 @endforeach
@@ -307,14 +307,14 @@
         }
         function selectVariant(element) {
             var dataId = $(element).data('id');
+            var dataImage = element.dataset.image;
 
             productVariant = productVariants.find(function(element) {
                 return element.id === dataId;
             });
             productQuantity = productVariant['quantity'];
             showVariant(JSON.parse(productVariant.variant_value))
-            console.log("productVariant:", this.productVariant);
-            console.log("Selected variant with data-id:", dataId);
+            $('.product__details__pic__item--large').attr('src', dataImage);
             $(element).parent().find('.btn').removeClass('active');
             $(element).addClass('active');
         }

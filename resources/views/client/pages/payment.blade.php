@@ -11,7 +11,7 @@
                         <table>
                             <thead>
                             <tr>
-                                <th scope="col">Sản phẩm</th>
+                                <th scope="col" style="float: left;  text-align: left;">Sản phẩm</th>
                                 <th scope="col">Đơn giá</th>
                                 <th scope="col">Số lượng</th>
                                 <th scope="col">Tổng tiền</th>
@@ -25,8 +25,36 @@
                                     @php $price = ceil($cart->products->price -(($cart->products->price * $cart->products->discounts )/100)); @endphp
                                     <input type="hidden" name="id[]" value="{{$cart->id}}">
                                     <tr id="pro{{$cart->product_id }}">
-                                        <td>
+                                        <td style="float: left;  text-align: left;">
                                             <h5>{{$cart->products->namePro}}</h5>
+                                            <br>
+                                            @if (!empty($cart->productVariant))
+                                                <div class="header__top__right__language">
+                                                    <div>Phân loại: <b>
+                                                            {{ $cart->productVariant->variant_type }}</b>
+                                                    </div>
+                                                    @php $variantValues = json_decode($cart->productVariant->variant_value, true); @endphp
+                                                    <span class="arrow_carrot-down"></span>
+                                                    <ul style="color: #ffffff;width: 200px; ">
+                                                        @foreach ($variantValues as $key => $item)
+                                                            @if ($key == 'color')
+                                                                <li>
+                                                                    <a>{{ $key }}:
+                                                                        <span
+                                                                            style="background-color: {{ $item }}; border-radius: 4px; color:{{ $item }}; font-size: 8px">{{ $item }}
+                                                                        </span>
+                                                                    </a>
+                                                                </li>
+                                                            @elseif ($key != 'image' && $key != 'quantity' && $key != 'price' && $key != 'name')
+                                                                <li>
+                                                                    <a>{{ $key }}:
+                                                                        {{ $item }}</a>
+                                                                </li>
+                                                            @endif
+                                                        @endForeach
+                                                    </ul>
+                                                </div>
+                                            @endif
                                         </td>
                                         <td >
                                             {{ number_format(ceil($cart->productVariant->price), 0, ',', '.') . ' ₫' }}

@@ -133,6 +133,7 @@ Route::name('cp-admin.')->middleware('AdminLogin')->prefix('cp-admin/')->group(f
             Route::get('edit/{id}', [RoleController::class, 'edit'])->name('edit')->middleware('can:SUA-CHUC-VU');
             Route::post('update/{id}', [RoleController::class, 'update'])->name('update')->middleware('can:SUA-CHUC-VU');
             Route::get('delete/{id}', [RoleController::class, 'delete'])->name('delete')->middleware('can:XOA-CHUC-VU');
+            
         });
     });
 

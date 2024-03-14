@@ -31,10 +31,10 @@
                         </div>
                         <div class="col-sm-4">
                             <label for="slugCategories">Loại giá trị input<span class="text-danger">(*)</span></label>
-                            <select class="form-control"name="type" disabled>
-                                <option value="text">Text</option>
-                                <option value="color">Color</option>
-                                <option value="number">Number</option>
+                            <select class="form-control"name="type" >
+                                <option value="text" selected >Text</option>
+                                {{-- <option value="color">Color</option>
+                                <option value="number">Number</option> --}}
                             </select>
                             @error('type')
                                 <span class="text-danger">

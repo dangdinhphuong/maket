@@ -108,31 +108,31 @@
                                 <td>{{ number_format($product->price, 0, ',', '.') . ' ₫' }}</td>
                                 <td>{{ $product->quantity }}</td>
                                 @if (count($product->productVariant) >= 1)
-                                    <td>
+                                    <td class="btn {{ $product->status == 1 ? 'btn-primary' : 'btn-danger' }} w-100">
                                         <select class="custom-select" id="statusSelect-{{ $product->id }}"
                                             onchange="updateStatus({{ $product->id }})">
-                                            <option selected value="1">Đang hoạt động</option>
-                                            <option selected value="0">Ngưng hoạt động</option>
+                                            <option {{ $product->status == 1 ? 'selected' : '' }} value="1">Đang hoạt
+                                                động</option>
+                                            <option {{ $product->status == 0 ? 'selected' : '' }} value="0">Ngưng hoạt
+                                                động</option>
                                         </select>
                                     </td>
                                 @else
                                     <td><span style=""
-                                            class="btn {{ $product->status == 1 ? 'btn-primary' : 'btn-danger' }} w-100">
-                                            {{ App\Common\Constants::STATUS_PRODUCTS[$product->status] }}</span>
+                                            class="btn btn-warning w-100"> Chưa có phân loại</span>
                                     </td>
-                                   
                                 @endif
                                 <td>
-                                @can('SUA-SAN-PHAM')
-                                    <a href="{{ route('cp-admin.products.edit', ['id' => $product->id]) }}" class="btn-lg"><i
-                                            class="fas fa-pencil-alt"></i></a>
-                                    <a href="{{ route('cp-admin.products.variant.edit', ['id' => $product->id]) }}"
-                                        class="btn-lg"><i class="fas fa-list"></i></a>
-                                @endcan
-                                @can('XOA-SAN-PHAM')
-                                    <a class="btn-lg" onclick="deleteCate({{ $product->id }})"><i
-                                            class="fas fa-trash"></i></a>
-                                @endcan
+                                    @can('SUA-SAN-PHAM')
+                                        <a href="{{ route('cp-admin.products.edit', ['id' => $product->id]) }}"
+                                            class="btn-lg"><i class="fas fa-pencil-alt"></i></a>
+                                        <a href="{{ route('cp-admin.products.variant.edit', ['id' => $product->id]) }}"
+                                            class="btn-lg"><i class="fas fa-list"></i></a>
+                                    @endcan
+                                    @can('XOA-SAN-PHAM')
+                                        <a class="btn-lg" onclick="deleteCate({{ $product->id }})"><i
+                                                class="fas fa-trash"></i></a>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -199,8 +199,9 @@
                     }
                 });
         }
+
         function updateStatus(id) { // thêm sản phẩm có sô lượng
-            let status = $("#statusSelect-"+id).val();
+            let status = $("#statusSelect-" + id).val();
             let _token = $("input[name=_token]").val();
             const url = '/cp-admin/products/update/status/' + id;
             let data = {
@@ -212,6 +213,14 @@
                 url: url,
                 data: data,
                 success: function(res) {
+                    // Thay đổi lớp CSS của thẻ td từ btn-primary thành btn-danger
+                    console.log('statusSelect',status)
+                    if(status == 1){
+                        $("#statusSelect-" + id).closest('td').removeClass('btn-danger').addClass('btn-primary');
+                    }else{
+                        $("#statusSelect-" + id).closest('td').removeClass('btn-primary').addClass('btn-danger');
+                    }
+                    // Hiển thị thông báo thành công
                     swal(res.message, {
                         icon: res.status,
                         timer: 1000
@@ -228,9 +237,8 @@
                     });
                 },
             });
-
-
         }
+
         $(document).ready(function() {
             $(".page-link").on("click", function(e) {
                 e.preventDefault();

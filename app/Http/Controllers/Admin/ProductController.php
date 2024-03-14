@@ -42,14 +42,21 @@ class ProductController extends Controller
     }
     public function store(StoreProductRequest $request)
     {
-        $pathAvatar = $request->file('image')->store('public/images/products');
-        $pathAvatar = str_replace("public/", "", $pathAvatar);
         try {
             DB::beginTransaction();
             $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id','cost']);
             $data['users_id'] = auth()->user()->id;
-            $data['image'] = $pathAvatar;
+            $data['image'] = '';
             $product = Product::create($data);
+            if ($request->hasFile('image')) {
+                foreach ($request->file('image') as $image) {
+                    $filename = $image->store('public/images/products'); // Adjust storage path as per your requirement
+                    $data['image'] = $pathAvatar = str_replace("public/", "", $filename);
+                    $product->productImage()->create(['image' => $pathAvatar,'type'=>1]);
+                }
+            }
+            $product->update($data);
+
             DB::commit();
             return redirect()->route('cp-admin.products.variant.edit',['id'=>$product->id])->with('message', 'Thêm sản phẩm thành công !');
         } catch (Exception $exception) {
@@ -84,7 +91,11 @@ class ProductController extends Controller
             [
                 'namePro' => 'required|min:3|max:100|unique:products,namePro,' . $Product->id,
                 'slug' => 'required|min:3|max:100|unique:products,slug,' . $Product->id,
-                'image' => 'mimes:jpg,bmp,png|max:2048',
+                'image.*' => [
+                    'sometimes', // Chỉ kiểm tra nếu người dùng tải lên ảnh mới
+                    'mimes:jpg,bmp,png', // Định dạng ảnh phải là jpg, bmp hoặc png
+                    'max:2048' // Kích thước tối đa là 2048KB
+                ],
                 'quantity' => 'required|numeric|min:0',
                 'price' => 'required|numeric|min:1',
                 'discounts' => 'required|numeric|min:0|max:100',
@@ -94,25 +105,27 @@ class ProductController extends Controller
                 'origin_id' => 'required|numeric|min:1'
             ]
         );
-        //dd($request->all());
-
-        if ($request->file('image') != null) {
-            if (file_exists('storage/' . $Product->image)) {
-                unlink('storage/' . $Product->image);
+       
+        foreach($Product->productImage->where('type',1) as $productImage ){
+            if (file_exists('storage/' . $productImage->image)) {
+                unlink('storage/' . $productImage->image);
             }
-            $pathAvatar = $request->file('image')->store('public/images/products');
-            $pathAvatar = str_replace("public/", "", $pathAvatar);
-        } else {
-            $pathAvatar = $Product->image;
         }
 
         try {
             DB::beginTransaction();
-
             $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id']);
             $data['users_id'] = auth()->user()->id;
-            $data['image'] = $pathAvatar;
 
+
+            $Product->productImage()->where('type',1)->delete();
+            if ($request->hasFile('image')) {
+                foreach ($request->file('image') as $image) {
+                    $filename = $image->store('public/images/products'); // Adjust storage path as per your requirement
+                    $data['image'] = $pathAvatar = str_replace("public/", "", $filename);
+                    $Product->productImage()->create(['image' => $pathAvatar,'type'=>1]);
+                }
+            }
             $Product->update($data);
             DB::commit();
             return redirect()->route('cp-admin.products.index')->with('message', 'Cập nhật sản phẩm thành công');
@@ -147,8 +160,9 @@ class ProductController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $Product = Product::find($id);
+        $data = $request->all();
         if ($Product) {
-            $Product->update(['status',$request->all()['status']]);
+            $Product->update(['status'=>$data['status']]);
             return response()->json([
                 'message' => "Cập nhật sản phẩm thành công",
                 'status' => "200"

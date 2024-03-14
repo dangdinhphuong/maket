@@ -495,7 +495,7 @@ class ClientController extends Controller
     {
         $sales = [];
         $data = $request->all();
-        dd($data);
+        // dump($data);
         session()->put('order', $data);
         DB::beginTransaction();
         try {
@@ -510,8 +510,10 @@ class ClientController extends Controller
             //     $sales->update(['number_sale', $sales->number_sale -= 1]);
             // }
             $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
-            $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
-            $carts->load('user')->load('products');
+            $carts = Cart::where('customer_id', auth()->user()->id)
+            ->orderBy('id', 'DESC')
+            ->with(['products','user','productVariant'])
+            ->get();
             if ($data['exampleRadios'] == "cash") {
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
@@ -523,17 +525,12 @@ class ClientController extends Controller
                     }
                     $data['name'] = $cart->products->namePro;
                     $data['slug'] = $cart->products->slug;
-                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                    $data['price'] = ceil($cart->productVariant->price);
                     $data['quantity'] = $cart->quantity;
                     $data['order_id'] = $order->id;
                     $data['users_id'] = $cart->products->users_id;
                     $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
-                    $product->update(['quantity' => $product->quantity - $cart->quantity]);
-                    // if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
-                    //     $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
-                    //     $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
-                    // }
-
+                    $data['product_variant_id'] = $cart->productVariant->id;
                     OrderDetail::create($data);
                     $cart->delete();
                 }

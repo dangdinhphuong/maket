@@ -44,7 +44,7 @@
                                                             </div>
                                                             @php $variantValues = json_decode($cart->productVariant->variant_value, true); @endphp
                                                             <span class="arrow_carrot-down"></span>
-                                                            <ul style="color: #ffffff">
+                                                            <ul style="color: #ffffff;width: 200px; ">
                                                                 @foreach ($variantValues as $key => $item)
                                                                     @if ($key == 'color')
                                                                         <li>
