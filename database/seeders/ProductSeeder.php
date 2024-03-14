@@ -33,12 +33,12 @@ class ProductSeeder extends Seeder
             $price = $cost + rand(3000, 10000000);
             DB::table('products')->insert([
                 'namePro' => $name,
-                'image' => 'images/products/product-'.rand(1,12).'.jpg',
+                'image' => 'images/products/'.rand(1,12).'.jpg',
                 'quantity' => rand(1, 1000),
                 'price' => $price,
                 'cost' => $cost,
                 'discounts'=>rand(0, 100),
-                'status' => rand(0, 1),
+                'status' => 0,
                 'category_id' => Category::all()->random()->id,
                 'supplier_id' => Supplier::all()->random()->id,
                 'users_id'=> optional(User::where('role_id', 3)->inRandomOrder()->first())->id,

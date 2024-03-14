@@ -108,9 +108,11 @@
                         @error('origin_id')<span class="text-danger">{{$message}}</span>@enderror
                     </div>
                     <div class="col-sm-6">
-                        <label for="slugCategories">Trạng thái<span class="text-danger">(*)</span></label>
+                        <label for="slugCategories">Trạng thái<span class="text-danger">( Cần tối thiểu 1 phân loại )</span></label>
                         <select class="custom-select" name="status" id="inputGroupSelect01">
+                            @if(count($Product->productVariant) >= 1)
                             <option {{ $Product->status ==1 ? "selected": "" }} value="1">Đang hoạt động</option>
+                            @endif
                             <option {{ $Product->status ==0 ? "selected": "" }} value="0">Ngưng hoạt động</option>
                         </select>
                         @error('status')<span class="text-danger">{{$message}}</span>@enderror

@@ -69,6 +69,18 @@
                                                                         style=" width: 100%;height: 50%;"
                                                                         class="progressive-img_full">
                                                                 </div>
+
+                                                                @elseif ($key == 'quantity' || $key == 'price')
+                                                                <div class="form-group"
+                                                                    style="width: 10%; margin-right: 1%;">
+                                                                    <label for="slugCategories">{{ $key }}</label>
+                                                                    <input type="{{ $key }}"
+                                                                    name="variants[{{$variant->id}}][{{$key}}]"
+                                                                    value='{{ $item }}'
+                                                                    class="form-control float-right w-100"
+                                                                    placeholder="{{ $key }}" >
+                                                                </div>
+
                                                             @else
                                                                 <div class="form-group"
                                                                     style="width: 10%; margin-right: 1%;">
@@ -86,6 +98,7 @@
                                                                 style="    margin-top: 28%;"><i
                                                                     class="fas fa-fw fa-trash"></i></div>
                                                         </div>
+                                                    </div>
                                                 @endForeach
                                             </div>
                                         </div>
@@ -108,18 +121,6 @@
         placeholder: "Chọn loại biến thể (tối đa 3)" // Update placeholder with limit info
     });
 </script>
-
-    <script>
-        $(function() {
-            // Summernote
-            $('#summernote').summernote()
-            // CodeMirror
-            CodeMirror.fromTextArea(document.getElementById("codeMirrorDemo"), {
-                mode: "htmlmixed",
-                theme: "monokai"
-            });
-        })
-    </script>
     <script>
         function deleteVariant(url, id) {
             swal({
@@ -142,7 +143,7 @@
                                     }).then(function() {
                                         $("#variant_" + id).remove();
                                     });
-                                } else if (res.status == 401) {
+                                } else {
                                     swal(res.message, {
                                         icon: "error",
                                     });
@@ -228,7 +229,6 @@
     </script>
     <script>
         function previewFile(input, key) {
-            console.log(input, key);
             var file = $("#product_image_" + key).get(0).files[0];
             console.log(file);
             if (file) {

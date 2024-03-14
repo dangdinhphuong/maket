@@ -27,12 +27,9 @@ class ProductController extends Controller
             ->when(auth()->user()->role_id == 3, function ($query) {
                 return $query->where('users_id', auth()->user()->id);
             })
+            ->with(['category','supplier','origin','User','productVariant'])
             ->orderBy('id', 'DESC')
             ->Paginate(7);
-        $products->load('category'); // gọi products bên model
-        $products->load('supplier');
-        $products->load('origin');
-        $products->load('User');
 
         return view('admin.pages.product.index', compact('products','supplier', 'categoryAll', 'origin'));
     }
@@ -52,9 +49,9 @@ class ProductController extends Controller
             $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id','cost']);
             $data['users_id'] = auth()->user()->id;
             $data['image'] = $pathAvatar;
-            Product::create($data);
+            $product = Product::create($data);
             DB::commit();
-            return redirect()->route('cp-admin.products.index')->with('message', 'Thêm sản phẩm thành công !');
+            return redirect()->route('cp-admin.products.variant.edit',['id'=>$product->id])->with('message', 'Thêm sản phẩm thành công !');
         } catch (Exception $exception) {
             DB::rollBack();
             Log::error('message :', $exception->getMessage() . '--line :' . $exception->getLine());
@@ -66,7 +63,7 @@ class ProductController extends Controller
     }
     public function edit($id)
     {
-        $Product = Product::find($id);
+        $Product = Product::with('productVariant')->find($id);
         if(!$Product){
             return redirect()->back();
         }
@@ -147,5 +144,19 @@ class ProductController extends Controller
             'status' => "401"
         ]);
     }
-    
+    public function updateStatus(Request $request, $id)
+    {
+        $Product = Product::find($id);
+        if ($Product) {
+            $Product->update(['status',$request->all()['status']]);
+            return response()->json([
+                'message' => "Cập nhật sản phẩm thành công",
+                'status' => "200"
+            ]);
+        }
+        return response()->json([
+            'message' => "Không tìm thấy sản phẩm",
+            'status' => "401"
+        ]);
+    }
 }

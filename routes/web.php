@@ -72,6 +72,7 @@ Route::name('cp-admin.')->middleware('AdminLogin')->prefix('cp-admin/')->group(f
         Route::post('store', [ProductController::class, 'store'])->name('store')->middleware('can:THEM-SAN-PHAM');
         Route::get('edit/{id}', [ProductController::class, 'edit'])->name('edit')->middleware('can:SUA-SAN-PHAM');
         Route::post('update/{id}', [ProductController::class, 'update'])->name('update')->middleware('can:SUA-SAN-PHAM');
+        Route::post('update/status/{id}', [ProductController::class, 'updateStatus'])->name('updateStatus')->middleware('can:SUA-SAN-PHAM');
         Route::get('delete/{id}', [ProductController::class, 'delete'])->name('delete')->middleware('can:XOA-SAN-PHAM');
         Route::name('variant.')->group(function () {
             Route::get('{id}/variant', [ProductVariantController::class, 'edit'])->name('edit')->middleware('can:SUA-SAN-PHAM');

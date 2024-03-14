@@ -17,9 +17,9 @@ class ProductVariantController extends Controller
         if (!$Product) {
             return redirect()->back();
         }
-        $typeVariants = Variants::where('user_id',auth()->user()->id)->get();
+        $typeVariants = Variants::where('user_id', auth()->user()->id)->get();
         $variants = ProductVariant::where('product_id', $id)->get();
-        return view('admin.pages.product.variant', compact('variants', 'Product','typeVariants' ));
+        return view('admin.pages.product.variant', compact('variants', 'Product', 'typeVariants'));
     }
 
     public function update(Request $request, $id)
@@ -32,13 +32,18 @@ class ProductVariantController extends Controller
         }
 
         foreach ($data['variants'] as $key => $item) {
-            $variants[] = $this->formatProductVariant($item, $id);
+            if (is_int($key)) {
+               $productVariant =  ProductVariant::find($key);
+               $productVariant->update($this->formatProductVariant( $productVariant, $item));
+            } else {
+                $variants[] = $this->formatNewProductVariant($item, $id);
+            }
         }
         ProductVariant::insert($variants);
         return redirect()->back();
     }
 
-    public function formatProductVariant($data, $productId)
+    public function formatNewProductVariant($data, $productId)
     {
         if (!empty($data['image'])) {
             $productImage = $this->imageProductVariant($data, $productId);
@@ -53,6 +58,18 @@ class ProductVariantController extends Controller
             'image_id' => $productImage->id ?? null
         ];
     }
+    
+    public function formatProductVariant( $productVariant, $item)
+    {
+        $variantValues = json_decode($productVariant['variant_value'], true); 
+        $variantValues["quantity"] = $productVariant["quantity"];
+        $variantValues["price"] = $productVariant["price"];
+        return [
+            'variant_value' => json_encode($variantValues),
+            'price' => $productVariant["price"],
+            'quantity' => $productVariant["quantity"]
+        ];
+    }
 
     public function imageProductVariant($data, $productId)
     {
@@ -64,8 +81,15 @@ class ProductVariantController extends Controller
 
     public function delete($productId, $id)
     {
-        $variant = ProductVariant::find($id);
-        if (!$variant) {
+        $productVariant = ProductVariant::where('product_id', $productId)->get();
+        $variant = $productVariant->where('id', $id)->first();
+        if (count($productVariant) <= 1) {
+            return response()->json([
+                'message' => "Xóa thất bại, sản phẩm tối thiểu 1 phân loại",
+                'status' => "404"
+            ]);
+        }
+        if (empty($variant)) {
             return response()->json([
                 'message' => "Danh biến thể không tồn tại",
                 'status' => "404"
