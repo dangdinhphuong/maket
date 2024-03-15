@@ -29,14 +29,16 @@ use Illuminate\Support\Facades\Redirect;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use App\Models\ProductVariant;
+use App\Http\Controllers\VnPayController;
 
 
 class ClientController extends Controller
 {
     protected $categories;
 
-    public function __construct()
+    public function __construct( VnPayController $vnPayController)
     {
+        $this->vnPayController = $vnPayController;
         $this->categories = Category::orderBy('id', 'DESC')->limit(15)->get();
         $this->categories->load('products');
         View::share('categories', $this->categories);
@@ -442,25 +444,34 @@ class ClientController extends Controller
         try {
             $sales = [];
             $data = session()->get('order');
-            if (!empty($data['voucher'])) {
-                $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
-                if (empty($sales)) {
-                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
-                }
-                if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
-                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
-                }
-                $sales->update(['number_sale', $sales->number_sale -= 1]);
-            }
+//            if (!empty($data['voucher'])) {
+//                $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
+//                if (empty($sales)) {
+//                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+//                }
+//                if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
+//                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+//                }
+//                $sales->update(['number_sale', $sales->number_sale -= 1]);
+//            }
             if (empty($request->vnp_ResponseCode) || $request->vnp_ResponseCode != "00") {
                 return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
             }
+
+
+
             $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
-            $carts = Cart::where('customer_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
-            $carts->load('user')->load('products');
+
+
+            $carts = Cart::where('customer_id', auth()->user()->id)
+                ->orderBy('id', 'DESC')
+                ->with(['products','user','productVariant'])
+                ->get();
+
             if ($carts->count() <= 0) {
                 return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
             }
+
             foreach ($carts as $cart) {
                 $product = Product::find($cart->products->id);
                 if ($product->quantity < $cart->quantity) {
@@ -468,17 +479,12 @@ class ClientController extends Controller
                 }
                 $data['name'] = $cart->products->namePro;
                 $data['slug'] = $cart->products->slug;
-                $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
+                $data['price'] = ceil($cart->productVariant->price);
                 $data['quantity'] = $cart->quantity;
                 $data['order_id'] = $order->id;
                 $data['users_id'] = $cart->products->users_id;
                 $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
-                $product->update(['quantity' => $product->quantity - $cart->quantity]);
-                if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
-                    $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
-                    $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
-                }
-
+                $data['product_variant_id'] = $cart->productVariant->id;
                 OrderDetail::create($data);
                 $cart->delete();
             }
@@ -495,26 +501,16 @@ class ClientController extends Controller
     {
         $sales = [];
         $data = $request->all();
-        // dump($data);
+        dump(asset('api/vn-pay'));
         session()->put('order', $data);
         DB::beginTransaction();
         try {
-            // if (!empty($data['voucher'])) {
-            //     $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
-            //     if (empty($sales)) {
-            //         return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
-            //     }
-            //     if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
-            //         return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
-            //     }
-            //     $sales->update(['number_sale', $sales->number_sale -= 1]);
-            // }
-            $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
             $carts = Cart::where('customer_id', auth()->user()->id)
             ->orderBy('id', 'DESC')
             ->with(['products','user','productVariant'])
             ->get();
             if ($data['exampleRadios'] == "cash") {
+                $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
                 }
@@ -535,23 +531,18 @@ class ClientController extends Controller
                     $cart->delete();
                 }
             } else {
-
                 $totalPayment = 0;
+                if ($carts->count() <= 0) {
+                    return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
+                }
                 foreach ($carts as $cart) {
                     $product = Product::find($cart->products->id);
                     if ($product->quantity < $cart->quantity) {
                         return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
                     }
-                    $data['price'] = ceil($cart->products->price - (($cart->products->price * $cart->products->discounts) / 100));
-                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
-
-                    if (!empty($sales->products_id) && in_array($cart->product_id, json_decode($sales->products_id))) {
-                        $discountMultiplier = 1 - ((int)$sales->discount_percent / 100);
-                        $data['totalPrice'] = ($data['price'] * $cart->quantity) * $discountMultiplier;
-                    }
-
-                    $totalPayment += ceil($data['totalPrice']);
+                    $totalPayment += ceil($cart->productVariant->price * $cart->quantity);
                 }
+
                 $response = $this->makeCurlRequestAndRedirect($totalPayment);
                 return redirect()->to($response);
             }
@@ -565,18 +556,14 @@ class ClientController extends Controller
     public function makeCurlRequestAndRedirect($price)
     {
         // Your cURL request
-        $response = Http::get('https://monitoring-a3f31d970013.herokuapp.com/api/vn-pay', [
+        $data = [
             'vnp_TmnCode' => 'NRQRJA4J',
             'vnp_HashSecret' => 'GLQYEDNCQMOQNNTMBWMPAAEDPWTWLFOH',
             'vnp_Returnurl' => route('payment-vnpay'),
             'vnp_Amount' => $price,
-        ]);
-
-        if ($response->successful()) {
-            return $response->json()["data"];
-        } else {
-            return '';
-        }
+        ];
+        $response = $this->vnPayController->create($data);
+        return $response["data"];
     }
     public function order()
     {
