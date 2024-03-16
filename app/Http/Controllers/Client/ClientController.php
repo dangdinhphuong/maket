@@ -265,8 +265,13 @@ class ClientController extends Controller
                 $productVariantId = (int)$dataProductVariant["id"];
                 $productVariantById = ProductVariant::find($productVariantId);
                 if (!empty($productVariantById)) {
-                    $newQuantity =  $productVariantById->quantity - $productQuantity;
-                    $productVariantById->update(['quantity' =>  $newQuantity]);
+                    $newQuantity =  $productVariantById->quantity - $quantity;
+                    $variantValues = json_decode($productVariantById['variant_value'], true);
+                    $variantValues["quantity"] = $newQuantity;
+                    $productVariantById->update([
+                        'variant_value' => json_encode($variantValues),
+                        'quantity' => $newQuantity
+                    ]);
                 }
             } else {
                 $productQuantity =  $Product->quantity;
@@ -460,7 +465,7 @@ class ClientController extends Controller
 
 
 
-            $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
+            $order = Order::create(array_merge($data, ['users_id' => auth()->user()->id]));
 
 
             $carts = Cart::where('customer_id', auth()->user()->id)
@@ -501,7 +506,6 @@ class ClientController extends Controller
     {
         $sales = [];
         $data = $request->all();
-        dump(asset('api/vn-pay'));
         session()->put('order', $data);
         DB::beginTransaction();
         try {
@@ -509,7 +513,7 @@ class ClientController extends Controller
             ->orderBy('id', 'DESC')
             ->with(['products','user','productVariant'])
             ->get();
-            if ($data['exampleRadios'] == "cash") {
+            if ($data['payment_method'] == "cash") {
                 $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
@@ -550,6 +554,7 @@ class ClientController extends Controller
             return redirect()->back()->with('message', 'Đơn hàng mua thành công');
         } catch (Exception $e) {
             DB::rollBack();
+            dd($e->getMessage());
             return redirect()->back()->with('error', 'Đơn hàng mua thất bại');
         }
     }
@@ -567,9 +572,13 @@ class ClientController extends Controller
     }
     public function order()
     {
-        $Orders = Order::where('users_id', auth()->user()->id)->orderBy('id', 'DESC')->get();
-        $Orders->load('order_detail');
-        return view('client.pages.order', compact('Orders'));
+        $orderDetails = OrderDetail::with(['order.User','productVariant.product.User'])
+        ->whereHas('order', function ($query) {
+            $query->where('users_id', auth()->id());
+        })
+        ->orderBy('id', 'DESC')->get();
+//        dd($orderDetails);
+        return view('client.pages.order', compact('orderDetails'));
     }
 
     public function order_detail(Request $request, $id)

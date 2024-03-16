@@ -73,7 +73,7 @@
                         <li>Tên khách hàng <span>{{$Orders->fullname}}</span></li>
                         <li>Số điện thoại <span>{{$Orders->phone}}</span></li>
                         <li>Địa chỉ giao hàng <span>{{$Orders->address}}</span></li>
-                        <li>Ghi chú  <span>{{$Orders->note}}</span></li>
+                        <li>Ghi chú  <span>{{$Orders->address}}</span></li>
                     </ul>
                 </div>
             </div>

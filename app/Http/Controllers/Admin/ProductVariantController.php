@@ -25,6 +25,7 @@ class ProductVariantController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->all();
+
         $variants = [];
         $Product = Product::find($id);
         if (!$Product) {
@@ -58,16 +59,16 @@ class ProductVariantController extends Controller
             'image_id' => $productImage->id ?? null
         ];
     }
-    
+
     public function formatProductVariant( $productVariant, $item)
     {
-        $variantValues = json_decode($productVariant['variant_value'], true); 
-        $variantValues["quantity"] = $productVariant["quantity"];
-        $variantValues["price"] = $productVariant["price"];
+        $variantValues = json_decode($productVariant['variant_value'], true);
+        $variantValues["quantity"] = $item["quantity"];
+        $variantValues["price"] = $item["price"];
         return [
             'variant_value' => json_encode($variantValues),
-            'price' => $productVariant["price"],
-            'quantity' => $productVariant["quantity"]
+            'price' => $item["price"],
+            'quantity' => $item["quantity"]
         ];
     }
 

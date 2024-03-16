@@ -129,13 +129,13 @@
                                             @error('note')<span class="text-danger">{{$message}}</span>@enderror
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="exampleRadios" id="exampleRadios1" value="cash" checked>
+                                            <input class="form-check-input" type="radio" name="payment_method" id="exampleRadios1" value="cash" checked>
                                             <label class="form-check-label" for="exampleRadios1">
                                                 Thanh toán khi nhận hàng
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="exampleRadios" id="vnpay" value="card">
+                                            <input class="form-check-input" type="radio" name="payment_method" id="vnpay" value="card">
                                             <label class="form-check-label" for="exampleRadios2">
                                                Thanh toán vnpay
                                             </label>
