@@ -12,7 +12,7 @@
                         <h4 class="card-title" style="font-size: 30px; font-weight:bold">Lượng trứng, sữa, trà nên dùng mỗi ngày</h4>
                         <a href="" class="web"><small style="margin-right: 10px">SỨC KHỎE</small> <small>18/04/2000</small></a>
                         <h4 style="font-size: 15px; font-weight:600">Chúng ta có thể ăn bánh mì, trứng, chuối, uống sữa, trà mỗi ngày, nhưng đừng quên cân đối số lượng, không sử dụng quá nhiều.</h4>
-                        <p>Khi cố gắng bổ sung thêm vitamin và khoáng chất từ các loại thực phẩm, bạn có thể dùng quá liều và gây hại cho sức khỏe của mình.
+                        <p>Khi cố gắng bổ sung thêm vitamin và khoáng chất từ danh mục, bạn có thể dùng quá liều và gây hại cho sức khỏe của mình.
                             Dưới đây là định lượng thức ăn hằng ngày từ một số nghiên cứu:  
                             <br>   
                             6 lát bánh mì

@@ -249,8 +249,8 @@ class UserController extends Controller
 
 
         if ($request->file('avatar') != null) {
-            if (file_exists('storage/' . auth()->user()->avatar)) {
-                unlink('storage/' . auth()->user()->avatar);
+            if (file_exists('storage/' . auth()->user()->avatar) && !empty(auth()->user()->avatar)) {
+                unlink('storage/' . auth()->user()->avatar??'');
             }
             $pathAvatar = $request->file('avatar')->store('public/users/avatar');
             $pathAvatar = str_replace("public/", "", $pathAvatar);

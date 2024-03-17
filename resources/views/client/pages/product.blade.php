@@ -387,7 +387,7 @@
             let status = $("#statusSelect0-" + id).val();
             let _token = $("input[name=_token]").val();
             let product_id = {!! $Product->id !!};
-            let customer_id = {!! auth()->user()->id !!};
+            let customer_id = {!! auth()->user()->id ?? 0 !!};
             let content = $('#commentInput').val();
             let data = {
                 product_id,

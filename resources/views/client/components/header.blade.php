@@ -148,7 +148,7 @@
                     <div class="hero__categories">
                         <div class="hero__categories__all">
                             <i class="fa fa-bars"></i>
-                            <span>Các loại thực phẩm</span>
+                            <span>Danh mục</span>
                         </div>
                         <ul style='display: {{ request()->route()->getName() != "home" ? "none" : "block" }} '>
                             @foreach($categories as $category)

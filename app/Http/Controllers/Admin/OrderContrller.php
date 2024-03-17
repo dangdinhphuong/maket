@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\OrderDetail;
 use App\Models\Order;
+use App\Models\ProductVariant;
 class OrderContrller extends Controller
 {
     public function index(Request $request)
@@ -43,11 +44,15 @@ class OrderContrller extends Controller
             'status.integer' => 'Trạng thái Không hợp lệ',
             'status.min'=>'Trạng thái Không hợp lệ',
         ]);
-        $Orders = OrderDetail::where('id', $id)->first();
+        $Orders = OrderDetail::with(['productVariant'])->find($id);
+        $variantValues = json_decode($Orders->productVariant->variant_value, true);
+        $variantValues['quantity'] = $Orders->productVariant->quantity + $Orders->quantity;
+        $newData= ['quantity' => $variantValues['quantity'],'variant_value' => json_encode($variantValues)];
         if(!$Orders){
             return redirect()->back();
         }
         $Orders->update($request->all());
+        ProductVariant::find($Orders->productVariant->id)->update($newData);
         return response()->json([
             'message' => "Cập nhật trạng thái thành công",
             'status' => "200"

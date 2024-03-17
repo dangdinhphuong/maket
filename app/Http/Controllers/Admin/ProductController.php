@@ -105,13 +105,6 @@ class ProductController extends Controller
                 'origin_id' => 'required|numeric|min:1'
             ]
         );
-       
-        foreach($Product->productImage->where('type',1) as $productImage ){
-            if (file_exists('storage/' . $productImage->image)) {
-                unlink('storage/' . $productImage->image);
-            }
-        }
-
         try {
             DB::beginTransaction();
             $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id']);
@@ -120,6 +113,11 @@ class ProductController extends Controller
 
             $Product->productImage()->where('type',1)->delete();
             if ($request->hasFile('image')) {
+                foreach($Product->productImage->where('type',1) as $productImage ){
+                    if (file_exists('storage/' . $productImage->image)) {
+                        unlink('storage/' . $productImage->image);
+                    }
+                }
                 foreach ($request->file('image') as $image) {
                     $filename = $image->store('public/images/products'); // Adjust storage path as per your requirement
                     $data['image'] = $pathAvatar = str_replace("public/", "", $filename);
