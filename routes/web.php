@@ -188,6 +188,7 @@ Route::get('blogs', [ClientController::class, 'blogs'])->name('blogs');
 Route::get('lien-he', [ClientController::class, 'contact'])->name('contact');
 Route::post('lien-he', [ClientController::class, 'sentContact'])->name('sentContact');
 Route::get('blog/{slug}', [ClientController::class, 'blog'])->name('blog');
+Route::get('shop/{id}', [ClientController::class, 'shop'])->name('shop');
 
 // check login
 Route::get('carts', [ClientController::class, 'carts'])->middleware('clientLogin')->name('carts');

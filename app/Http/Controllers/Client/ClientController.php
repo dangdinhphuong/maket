@@ -153,6 +153,37 @@ class ClientController extends Controller
         $category = $this->categories->load('products');
         return view('client.pages.products', compact('category', 'products', 'categories_slug'));
     }
+    
+    public function shop(Request $request,$id)
+    {
+        $categories_slug = '';
+        // kiểm tra xem có  slug_cate không. nếu có thì lấy id catte từ slug
+        if (request('slug_cate')) {
+            $categories_slug = Category::where('slug', request('slug_cate'))->first();
+            $categories_slug = $categories_slug ? $categories_slug : "";
+        }
+            if(empty( User::find($id))){
+                return redirect()->back();
+            }
+        $products = Product::filter(array_merge(request(['search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
+            ->where('status', 1)
+            ->where('users_id', $id)
+            ->with(['productVariant'])
+            ->Paginate(10);
+        foreach ($products as $index => $value) {
+            if (count($value['productVariant']) > 0) {
+                $sortedProducts = $products[$index]['productVariant']->sortBy('price');
+                $minPriceProduct = $sortedProducts->first();
+                $maxPriceProduct = $sortedProducts->last();
+                $products[$index]['minPiceProduct'] = $minPriceProduct->price;
+                $products[$index]['maxPriceProduct'] = $maxPriceProduct->price;
+            }
+        }
+        //dd($products[0]);
+        $category = $this->categories->load('products');
+        return view('client.pages.products', compact('category', 'products', 'categories_slug'));
+    }
+
 
 
     // // Sử dụng hàm để lấy sản phẩm có giá thấp nhất và cao nhất
@@ -503,7 +534,7 @@ class ClientController extends Controller
                 $data['totalPrice'] = $totalPrice;
                 $data['product_variant_id'] = $cart->productVariant->id;
                 $data['discount']= $discount;
-                
+
                 OrderDetail::create($data);
                 $cart->delete();
             }

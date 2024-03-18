@@ -44,9 +44,8 @@
                                         </div>
                                         <div class="UDaMW3" tabindex="0">
                                             {{ $orderDetail->productVariant->product->User->fullname }}</div>
-
                                         <a class="Mr26O7"
-                                            href="{{ route('order_detail', ['id' => $orderDetail->order->id]) }}">
+                                            href="{{ route('shop', ['id' => $orderDetail->productVariant->product->User->id]) }}">
                                             <div class="stardust-button">
                                                 <svg enable-background="new 0 0 15 15" viewBox="0 0 15 15" x="0" y="0"
                                                     class="shopee-svg-icon icon-btn-shop">

@@ -122,7 +122,7 @@
                         <div class="card-body">
                             <img style="width:100px; height: 100px;" src="{{ asset('storage/' . $Product->User->avatar) }}" class="rounded float-left mr-2" alt="...">
                             <div class=" mb-2" style="margin-top: 2%;"> {{ $Product->User->fullname }}</div>
-                            <a href="{{ $Product->User->id }}"  class="btn btn-outline-dark"> Xem shop</a>
+                            <a href="{{ route('shop',['id'=>$Product->User->id])  }}"  class="btn btn-outline-dark"> Xem shop</a>
                         </div>
                       </div>
                    
