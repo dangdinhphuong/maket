@@ -187,7 +187,7 @@
                     if (res.status == 200) {
                         $.each(carts, function(index, item) {
                             if (res.data.products_id.includes(item.product_id.toString())) {
-                                const price = parseFloat(item.product_variant.price);
+                                const price = parseFloat(item.product_variant.price)*item.quantity;
                                 const discount = parseFloat(res.data.discount_percent);
                                 console.log(item.quantity);
                                 totalDiscount += discount;
@@ -195,10 +195,9 @@
                                     totalDiscount = price;
                                 }
                             }
-
-                            $(`#totalDiscount`).text("- " + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalDiscount));
-                            $(`#totalPricePay`).text(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPricePay - totalDiscount));
                         });
+                        $(`#totalDiscount`).text("- " + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalDiscount));
+                        $(`#totalPricePay`).text(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPricePay - totalDiscount));
                     } else {
                         swal(res.message, {
                             icon: "error",

@@ -10,7 +10,7 @@
             <div class="about-freshio">
                 <b>Freshio organic store</b> là cửa hàng chuyên cung cấp các thực phẩm hữu cơ và tự nhiên với chuỗi cửa hàng
                 thực phẩm hữu cơ với mục tiêu giúp người tiêu dùng Việt Nam có một cuộc sống khỏe mạnh hơn thông qua những 
-                loại thực phẩm hữu cơ có chứng nhận, thực phẩm tự nhiên và không có nguồn gốc biến đổi gene (GMO). Chúng tôi 
+                danh mục hữu cơ có chứng nhận, thực phẩm tự nhiên và không có nguồn gốc biến đổi gene (GMO). Chúng tôi 
                 lựa chọn danh mục hữu cơ, thực phẩm tự nhiên từ các nhà sản xuất, các công ty trong và ngoài nước 
                 thông qua quá trình lựa chọn kỹ càng về khả năng cung ứng, các giấy chứng nhận tiêu chuẩn do các tổ chức uy 
                 tín thế giới cấp. Chúng tôi yêu thích những gì chúng tôi làm và chúng tôi đam mê những lợi ích của một lối sống 

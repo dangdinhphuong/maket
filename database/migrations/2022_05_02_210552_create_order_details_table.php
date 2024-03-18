@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('slug');
             $table->double('price');
             $table->double('totalPrice');
+            $table->double('discount')->nullable(); ;
             $table->integer('quantity');
             $table->foreignId('users_id')->constrained('users')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('order_id')->constrained('orders')->onUpdate('cascade')->onDelete('cascade');

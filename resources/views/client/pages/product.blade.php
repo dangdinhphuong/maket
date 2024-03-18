@@ -63,9 +63,15 @@
                             <span>(18 đánh giá)</span>
                         </div>
                         @if (!empty($Product->minPiceProduct))
-                            <div class="product__details__price">
-                                {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' ₫' }}
-                            </div>
+                            @if ($Product->minPiceProduct < $Product->maxPriceProduct)
+                                <div class="product__details__price">
+                                    {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($Product->maxPriceProduct, 0, ',', '.') . ' ₫' }}
+                                </div>
+                            @else
+                                <div class="product__details__price">
+                                    {{ number_format($Product->minPiceProduct, 0, ',', '.') . ' ₫' }}
+                                </div>
+                            @endif
                         @else
                             <div class="product__details__price">
                                 {{ number_format($Product->price - ($Product->price * $Product->discounts) / 100, 0, ',', '.') . ' ₫' }}
@@ -83,10 +89,12 @@
                             <div class="card-body">
                                 @foreach ($Product->productVariant as $productVariant)
                                     @if ($productVariant->quantity < 1)
-                                        <div class="btn btn-outline-dark disabled" style="    background-color: #d308084a;" >{{ $productVariant->variant_type }}
+                                        <div class="btn btn-outline-dark disabled" style="    background-color: #d308084a;">
+                                            {{ $productVariant->variant_type }}
                                         </div>
                                     @else
-                                        <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}" data-image="{{ asset('storage/' . json_decode($productVariant->variant_value,true)["image"]) }}"
+                                        <div class="btn btn-outline-dark" data-id="{{ $productVariant->id }}"
+                                            data-image="{{ asset('storage/' . json_decode($productVariant->variant_value, true)['image']) }}"
                                             onclick="selectVariant(this)">{{ $productVariant->variant_type }}</div>
                                     @endif
                                 @endforeach
@@ -109,6 +117,17 @@
                         @endif
                     </div>
                 </div>
+                <div class="col-lg-12 ">
+                    <div class="card">
+                        <div class="card-body">
+                            <img style="width:100px; height: 100px;" src="{{ asset('storage/' . $Product->User->avatar) }}" class="rounded float-left mr-2" alt="...">
+                            <div class=" mb-2" style="margin-top: 2%;"> {{ $Product->User->fullname }}</div>
+                            <a href="{{ $Product->User->id }}"  class="btn btn-outline-dark"> Xem shop</a>
+                        </div>
+                      </div>
+                   
+                </div>
+   
                 <div class="col-lg-12">
                     <div class="product__details__tab">
                         <ul class="nav nav-tabs" role="tablist">
@@ -152,8 +171,9 @@
                                                         @foreach ($Product->comments as $item)
                                                             @if ($item->status == 1)
                                                                 <div class="d-flex flex-row p-3"><img
-                                                                        src="https://i.imgur.com/zQZSWrt.jpg" width="40"
-                                                                        height="40" class="rounded-circle mr-3">
+                                                                        src="https://i.imgur.com/zQZSWrt.jpg"
+                                                                        width="40" height="40"
+                                                                        class="rounded-circle mr-3">
                                                                     <div class="w-100">
                                                                         <div
                                                                             class="d-flex justify-content-between align-items-center">
@@ -230,6 +250,7 @@
     </section>
     <!-- Related Product Section End -->
     <style>
+    
         body {
             background-color: #eee
         }
@@ -305,6 +326,7 @@
             }
 
         }
+
         function selectVariant(element) {
             var dataId = $(element).data('id');
             var dataImage = element.dataset.image;
@@ -326,15 +348,18 @@
             for (var key in newInfo) {
                 if (newInfo.hasOwnProperty(key)) {
                     if (newInfo[key].label == 'color') {
-                        variantHtml += `<li><b>${newInfo[key].label}</b> <span style="background-color: ${newInfo[key].value};">${newInfo[key].value}</span></li>`;
-                    }
-                    else if (newInfo[key].label != 'image' && newInfo[key].label != 'price') {
+                        variantHtml +=
+                            `<li><b>${newInfo[key].label}</b> <span style="background-color: ${newInfo[key].value};">${newInfo[key].value}</span></li>`;
+                    } else if (newInfo[key].label != 'image' && newInfo[key].label != 'price') {
                         variantHtml += `<li><b>${newInfo[key].label}</b> <span>${newInfo[key].value}</span></li>`;
                     }
                 }
             }
             var number = productVariant.price;
-            var formattedNumber = number.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+            var formattedNumber = number.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
             $('.product__details__price').text(formattedNumber)
             $('#info-Variant').empty();
             $('#info-Variant').append(variantHtml);

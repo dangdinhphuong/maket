@@ -35,7 +35,7 @@
                 <div class="col-lg-3 col-md-5">
                     <div class="sidebar">
                         <div class="sidebar__item categories1">
-                            <h4>Loại thực phẩm</h4>
+                            <h4>danh mục</h4>
                             <ul>
                                 @foreach ($category as $cate)
                                     <li
@@ -255,9 +255,15 @@
                                                 href="{{ route('product', ['slug' => $product->slug]) }}">{{ $product->namePro }}</a>
                                         </h5>
                                         @if (!empty($product->minPiceProduct))
+                                        @if ($product->minPiceProduct < $product->maxPriceProduct)
                                             <div class="product__item__price">
                                                 {{ number_format($product->minPiceProduct, 0, ',', '.') . ' - ' . number_format($product->maxPriceProduct, 0, ',', '.') . ' ₫' }}
                                             </div>
+                                            @else
+                                            <div class="product__item__price">
+                                                {{ number_format($product->minPiceProduct, 0, ',', '.') . ' ₫' }}
+                                            </div>
+                                            @endif
                                         @else
                                             <div class="product__item__price">
                                                 {{ number_format($product->price-($product->price * $product->discounts) / 100, 0, ',', '.') . ' ₫' }}
