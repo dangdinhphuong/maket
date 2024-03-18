@@ -9,7 +9,6 @@
                 <div class="col-lg-12">
                     <div class="shoping__cart__table">
                         <!-- Button trigger modal -->
-
                         @foreach ($orderDetails as $orderDetail)
                             <div class="card mb-5" data-toggle="modal"
                                 data-target=".bd-example-modal-lg-{{ $orderDetail->id }}">
@@ -245,7 +244,7 @@
                                                                         <li>Thành tiền
                                                                             <span>{{ number_format($orderDetail->price * $orderDetail->quantity, 0, ',', '.') . ' ₫' }}</span>
                                                                         </li>
-                                                                        <li>Thời gian đặt 
+                                                                        <li>Thời gian đặt
                                                                             <span>{{ $orderDetail->created_at }}</span>
                                                                         </li>
                                                                         <li>Phương thức thanh toán
@@ -285,7 +284,7 @@
                     </div>
                 </div>
             </div>
-
+            {!! $orderDetails->links('pagination::bootstrap-4') !!}
         </div>
     </section>
     <!-- Shoping Cart Section End -->

@@ -186,25 +186,16 @@
                 success: function(res) {
                     if (res.status == 200) {
                         $.each(carts, function(index, item) {
-
                             if (res.data.products_id.includes(item.product_id.toString())) {
-                                const price = Math.ceil(item.products.price * (1 - item.products.discounts / 100));
-                                const totalPriceBeforeDiscount = price * item.quantity; // tổng tiền
-
-                                const discountMultiplier = 1 - (res.data.discount_percent / 100);
-
-                                const totalPriceAfterDiscount = Math.ceil(totalPriceBeforeDiscount * discountMultiplier);
-
-                                const discountAmount = totalPriceBeforeDiscount - totalPriceAfterDiscount;
-
-                                console.log(price,totalPriceBeforeDiscount,discountMultiplier,totalPriceAfterDiscount)
-
-                                const formattedAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPriceAfterDiscount);
-                                const formattedDiscountAmount = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(discountAmount);
-                                totalDiscount += discountAmount;
-                                $(`#sale-${item.id}`).text("- "+formattedDiscountAmount);
-                                $(`#totalPrice-${item.id}`).text(formattedAmount);
+                                const price = parseFloat(item.product_variant.price);
+                                const discount = parseFloat(res.data.discount_percent);
+                                console.log(item.quantity);
+                                totalDiscount += discount;
+                                if(price < totalDiscount){
+                                    totalDiscount = price;
+                                }
                             }
+
                             $(`#totalDiscount`).text("- " + new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalDiscount));
                             $(`#totalPricePay`).text(new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalPricePay - totalDiscount));
                         });

@@ -110,7 +110,7 @@ class ClientController extends Controller
             ->first();
         if ($sales) {
             if ($this->isDateLessThanToday($sales->time_start) && $this->isDateGreaterThanToday($sales->time_end)) {
-                $data = ["1", "3", "4", "5"];
+
 
                 $sales->products_id = json_decode($sales->products_id);
                 return response()->json([
@@ -514,23 +514,41 @@ class ClientController extends Controller
             ->with(['products','user','productVariant'])
             ->get();
             if ($data['payment_method'] == "cash") {
+              if (!empty($data['voucher'])) {
+                $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
+                if (empty($sales)) {
+                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                }
+                if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
+                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                }
+                $sales->update(['number_sale', $sales->number_sale -= 1]);
+            }
                 $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
                 }
                 foreach ($carts as $cart) {
+                    $discount = 0;
                     $product = Product::find($cart->products->id);
+
                     if ($product->quantity < $cart->quantity) {
                         return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
                     }
+dd($cart);
+                    if(in_array($cart->id, json_decode($sales->products_id))){
+                        $discount = (int)$sales->products_id;dd($discount);
+                    }
+                    $a = ['1','2','3'];
                     $data['name'] = $cart->products->namePro;
                     $data['slug'] = $cart->products->slug;
                     $data['price'] = ceil($cart->productVariant->price);
                     $data['quantity'] = $cart->quantity;
                     $data['order_id'] = $order->id;
                     $data['users_id'] = $cart->products->users_id;
-                    $data['totalPrice'] = ceil($data['price'] * $cart->quantity);
+                    $data['totalPrice'] = ceil(($data['price'] * $cart->quantity)-$discount);
                     $data['product_variant_id'] = $cart->productVariant->id;
+                    $data['discount']= $discount;
                     OrderDetail::create($data);
                     $cart->delete();
                 }
@@ -570,13 +588,13 @@ class ClientController extends Controller
         $response = $this->vnPayController->create($data);
         return $response["data"];
     }
-    public function order()
+    public function order(Request $request)
     {
         $orderDetails = OrderDetail::with(['order.User','productVariant.product.User'])
         ->whereHas('order', function ($query) {
             $query->where('users_id', auth()->id());
         })
-        ->orderBy('id', 'DESC')->get();
+        ->orderBy('id', 'DESC')->Paginate(5);
 //        dd($orderDetails);
         return view('client.pages.order', compact('orderDetails'));
     }

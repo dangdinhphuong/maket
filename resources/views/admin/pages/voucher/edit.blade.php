@@ -35,14 +35,14 @@
                                 <option value="{{ $product->id }}" {{ in_array($product->id, $products_id)? 'selected' : '' }} price="0">{{ $product->namePro }}</option>
                             @endforeach
                         </select>
-                        
+
                         @error('products_id')
                         <span class="text-danger">
                             {{$message}}
                         </span>
                         @enderror
                     </div>
-                  
+
 
                     <div class="form-group col-sm-6">
                         <label for="image">Thời gian bắt đầu <span class="text-danger">(*)</span></label>
@@ -70,17 +70,17 @@
                                 <option selected value="1" {{ $sales->active == 1 ? 'selected' : '' }}>Đang hoạt động</option>
                                 <option value="0" {{ $sales->active == 1 ? 'selected' : '' }}>Ngưng hoạt động</option>
                             </select>
-                            @error('active')<span class="text-danger">{{$message}}</span>@enderror   
+                            @error('active')<span class="text-danger">{{$message}}</span>@enderror
                         </div>
                         <div class="col-sm-4">
                             <label for="slugCategories">Số lượng <span class="text-danger">(*)</span></label>
                             <input type="number" name="number_sale"value="{{ $sales->number_sale }}" class="form-control"placeholder="Số lượng">
-                                @error('number_sale')<span class="text-danger">{{$message}}</span>@enderror   
+                                @error('number_sale')<span class="text-danger">{{$message}}</span>@enderror
                             </div>
                             <div class="col-sm-4">
                                 <label for="slugCategories">Giảm giá (%)<span class="text-danger">(*)</span></label>
-                                <input type="number" name="discount_percent"value="{{ $sales->discount_percent }}" class="form-control"placeholder="Giảm giá" min="0" max="100">
-                                    @error('discount_percent')<span class="text-danger">{{$message}}</span>@enderror   
+                                <input type="number" name="discount_percent"value="{{ $sales->discount_percent }}" class="form-control"placeholder="Giảm giá" min="0">
+                                    @error('discount_percent')<span class="text-danger">{{$message}}</span>@enderror
                                 </div>
 
                 </div>

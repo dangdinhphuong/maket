@@ -37,7 +37,7 @@
                         <th>ID</th>
                         <th>Mã</th>
                         <th>Sô lượng</th>
-                        <th>Giảm (%)</th>
+                        <th>Giảm </th>
                         <th>Ngày hoạt động</th>
                         <th>Trạng thái</th>
                         <th>Hành động</th>
@@ -48,7 +48,7 @@
                         <th>ID</th>
                         <th>Mã</th>
                         <th>Sô lượng</th>
-                        <th>Giảm (%)</th>
+                        <th>Giảm</th>
                         <th>Ngày hoạt động</th>
                         <th>Trạng thái</th>
                         <th>Hành động</th>
@@ -60,9 +60,9 @@
                         <td>{{ $sale->id }}</td>
                         <td>{{ $sale->code }}</td>
                         <td>{{ $sale->number_sale }}</td>
-                        <td>{{ $sale->discount_percent }}</td>
+                        <td>{{ number_format($sale->discount_percent, 0, ',', '.') . ' ₫' }}</td>
                         <td>{{ $sale->time_start }} - {{ $sale->time_end }} </td>
-                        
+
                             <td><span style="" class="btn {{$sale->active== 1 ?'btn-primary':'btn-danger'}} w-100">{{ $sale->active == 1 ? "Hoat động" : "Tạm ngưng" }}</span></td>
                         <td>
                         @can('SUA-LOAI-SAN-PHAM')
