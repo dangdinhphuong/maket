@@ -13,7 +13,7 @@ use App\Models\Origin;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
-use GuzzleHttp\Handler\Proxy;
+use App\Models\ProductVariant;
 
 class ProductController extends Controller
 {
@@ -23,15 +23,15 @@ class ProductController extends Controller
         $supplier = Supplier::all();
         $categoryAll = Category::all();
         $origin = Origin::all();
-        $products = Product::filter(request(['search','category_id','supplier_id','origin_id','status']))
+        $products = Product::filter(request(['search', 'category_id', 'supplier_id', 'origin_id', 'status']))
             ->when(auth()->user()->role_id == 3, function ($query) {
                 return $query->where('users_id', auth()->user()->id);
             })
-            ->with(['category','supplier','origin','User','productVariant'])
+            ->with(['category', 'supplier', 'origin', 'User', 'productVariant'])
             ->orderBy('id', 'DESC')
             ->Paginate(7);
 
-        return view('admin.pages.product.index', compact('products','supplier', 'categoryAll', 'origin'));
+        return view('admin.pages.product.index', compact('products', 'supplier', 'categoryAll', 'origin'));
     }
     public function create()
     {
@@ -44,7 +44,7 @@ class ProductController extends Controller
     {
         try {
             DB::beginTransaction();
-            $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id','cost']);
+            $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id', 'cost']);
             $data['users_id'] = auth()->user()->id;
             $data['image'] = '';
             $product = Product::create($data);
@@ -52,13 +52,29 @@ class ProductController extends Controller
                 foreach ($request->file('image') as $image) {
                     $filename = $image->store('public/images/products'); // Adjust storage path as per your requirement
                     $data['image'] = $pathAvatar = str_replace("public/", "", $filename);
-                    $product->productImage()->create(['image' => $pathAvatar,'type'=>1]);
+                    $imageId = $product->productImage()->create(['image' => $pathAvatar, 'type' => 1]);
                 }
             }
             $product->update($data);
-
+            $productVariant = [
+                'product_id' => $product->id,
+                'variant_type' =>  $data["namePro"],
+                'variant_value' => json_encode(
+                    [
+                        "name" => $data["namePro"],
+                        "quantity" => $data["quantity"],
+                        "price" => $data["price"],
+                        "image" => $data["image"]
+                    ]
+                ),
+                'price' => $data["price"],
+                'quantity' => $data["quantity"],
+                'image_id' => $imageId->id ?? null,
+                'type' => 1
+            ];
+            ProductVariant::create($productVariant);
             DB::commit();
-            return redirect()->route('cp-admin.products.variant.edit',['id'=>$product->id])->with('message', 'Thêm sản phẩm thành công !');
+            return redirect()->route('cp-admin.products.variant.edit', ['id' => $product->id])->with('message', 'Thêm sản phẩm thành công !');
         } catch (Exception $exception) {
             DB::rollBack();
             Log::error('message :', $exception->getMessage() . '--line :' . $exception->getLine());
@@ -71,19 +87,20 @@ class ProductController extends Controller
     public function edit($id)
     {
         $Product = Product::with('productVariant')->find($id);
-        if(!$Product){
+        if (!$Product) {
             return redirect()->back();
         }
         $supplier = Supplier::all();
         $categoryAll = Category::all();
-    //    dd($supplier);
+        //    dd($supplier);
         $origin = Origin::all();
         return view('admin.pages.product.edit', compact('Product', 'supplier', 'categoryAll', 'origin'));
     }
     public function update(Request $request, $id)
     {
         $Product = Product::find($id);
-        if(!$Product){
+        $imageId = '';
+        if (!$Product) {
             return redirect()->back();
         }
         $this->validate(
@@ -111,9 +128,9 @@ class ProductController extends Controller
             $data['users_id'] = auth()->user()->id;
 
 
-            $Product->productImage()->where('type',1)->delete();
+            $Product->productImage()->where('type', 1)->delete();
             if ($request->hasFile('image')) {
-                foreach($Product->productImage->where('type',1) as $productImage ){
+                foreach ($Product->productImage->where('type', 1) as $productImage) {
                     if (file_exists('storage/' . $productImage->image)) {
                         unlink('storage/' . $productImage->image);
                     }
@@ -121,14 +138,30 @@ class ProductController extends Controller
                 foreach ($request->file('image') as $image) {
                     $filename = $image->store('public/images/products'); // Adjust storage path as per your requirement
                     $data['image'] = $pathAvatar = str_replace("public/", "", $filename);
-                    $Product->productImage()->create(['image' => $pathAvatar,'type'=>1]);
+                    $imageId = $Product->productImage()->create(['image' => $pathAvatar, 'type' => 1]);
                 }
             }
             $Product->update($data);
+            $productVariant = $Product->productVariant()->where('type', 1)->first();
+            $productVariant->update([
+                'variant_type' =>  $Product->namePro,
+                'variant_value' => json_encode(
+                    [
+                        "name" => $Product->namePro,
+                        "quantity" => $Product->quantity,
+                        "price" => $Product->price,
+                        "image" => $Product->image
+                    ]
+                ),
+                'price' => $Product->price,
+                'quantity' => $Product->quantity,
+                'image_id' => $imageId != '' ? $imageId->id : $productVariant->image_id
+            ]);
             DB::commit();
             return redirect()->route('cp-admin.products.index')->with('message', 'Cập nhật sản phẩm thành công');
         } catch (Exception $exception) {
             DB::rollBack();
+            dd('message :', $exception->getMessage() . '--line :' . $exception->getLine());
             Log::error('message :', $exception->getMessage() . '--line :' . $exception->getLine());
             if (file_exists('storage/' . $pathAvatar)) {
                 unlink('storage/' . $pathAvatar);
@@ -160,7 +193,7 @@ class ProductController extends Controller
         $Product = Product::find($id);
         $data = $request->all();
         if ($Product) {
-            $Product->update(['status'=>$data['status']]);
+            $Product->update(['status' => $data['status']]);
             return response()->json([
                 'message' => "Cập nhật sản phẩm thành công",
                 'status' => "200"

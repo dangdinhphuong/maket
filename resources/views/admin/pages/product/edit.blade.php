@@ -135,13 +135,10 @@
                             @enderror
                         </div>
                         <div class="col-sm-6">
-                            <label for="slugCategories">Trạng thái<span class="text-danger">( Cần tối thiểu 1 phân loại
-                                    )</span></label>
+                            <label for="slugCategories">Trạng thái</label>
                             <select class="custom-select" name="status" id="inputGroupSelect01">
-                                @if (count($Product->productVariant) >= 1)
-                                    <option {{ $Product->status == 1 ? 'selected' : '' }} value="1">Đang hoạt động
-                                    </option>
-                                @endif
+                                <option {{ $Product->status == 1 ? 'selected' : '' }} value="1">Đang hoạt động
+                                </option>
                                 <option {{ $Product->status == 0 ? 'selected' : '' }} value="0">Ngưng hoạt động
                                 </option>
                             </select>
@@ -154,19 +151,22 @@
                     <div class="form-group row">
                         <div class="col-sm-12 mb-3 mb-sm-0"><label for="slugCategories">Anh sản phẩm<span
                                     class="text-danger">(*)</span></label>
-                                    <input id="image" type="file" name="image[]" class="form-control" multiple onchange="previewFile(this)">
-                                    <div class="d-flex justify-content-start"> 
-                                        @foreach($Product->productImage->where('type',1) as $productImage )
-                                        <div class="mt-3" style="width: 100%; height: 200px; border: 1px solid gray; background-color: pink !important;text-align: center;">
-                                            <img style="width: 100%; height: 100%;" src="{{ asset("storage/$productImage->image") }}" alt=" Anh cũ">
-                                        </div>
-                                        @endforeach
+                            <input id="image" type="file" name="image[]" class="form-control" multiple
+                                onchange="previewFile(this)">
+                            <div class="d-flex justify-content-start">
+                                @foreach ($Product->productImage->where('type', 1) as $productImage)
+                                    <div class="mt-3"
+                                        style="width: 100%; height: 200px; border: 1px solid gray; background-color: pink !important;text-align: center;">
+                                        <img style="width: 100%; height: 100%;"
+                                            src="{{ asset("storage/$productImage->image") }}" alt=" Anh cũ">
                                     </div>
+                                @endforeach
+                            </div>
 
-                                    <div class="mt-3" style="font-size: 50px">
-                                        <i class="fas fa-arrow-right"></i>
-                                    </div>
-                                    <div class="d-flex justify-content-start previewFile"> </div>
+                            <div class="mt-3" style="font-size: 50px">
+                                <i class="fas fa-arrow-right"></i>
+                            </div>
+                            <div class="d-flex justify-content-start previewFile"> </div>
                             @error('image')
                                 <span class="text-danger">{{ $message }}</span>
                             @enderror
@@ -191,10 +191,10 @@
         function previewFile(input) {
             var files = $("#image").get(0).files;
             $('.previewFile').empty(); // Xóa tất cả các hình ảnh xem trước cũ trước khi thêm mới
-    
+
             for (var i = 0; i < files.length; i++) {
                 var reader = new FileReader();
-    
+
                 reader.onload = function(e) {
                     var html = `
                         <div class="mt-3" style="width: 20%; height: 200px; border: 1px solid gray; background-color: pink !important; text-align: center;">
@@ -202,16 +202,16 @@
                         </div>
                     `;
                     $('.previewFile').append(html); // Thêm hình ảnh xem trước mới vào
-    
+
                     // Nếu bạn muốn chỉ giới hạn số lượng hình ảnh được xem trước, bạn có thể thêm điều kiện ở đây
                     // Ví dụ: if ($('.previewFile > div').length >= 5) { return; } // Giới hạn tối đa 5 hình ảnh
                 }
-    
+
                 reader.readAsDataURL(files[i]);
             }
         }
     </script>
-    
+
 
     <script>
         $(function() {

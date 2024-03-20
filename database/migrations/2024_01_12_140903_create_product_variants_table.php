@@ -21,6 +21,7 @@ return new class extends Migration
             $table->double('price')->nullable();
             $table->integer('quantity')->nullable();
             $table->integer('image_id')->nullable();
+            $table->integer('type')->nullable()->default(0);
             $table->softDeletes();
             $table->timestamps();
         });

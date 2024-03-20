@@ -108,9 +108,9 @@
                         @error('origin_id')<span class="text-danger">{{$message}}</span>@enderror
                     </div>
                     <div class="col-sm-6">
-                    <label for="slugCategories">Trạng thái<span class="text-danger">( Cần tối thiểu 1 phân loại )</span></label>
+                    <label for="slugCategories">Trạng thái</label>
                         <select class="custom-select" name="status" id="inputGroupSelect01">
-{{--                            <option selected value="1">Đang hoạt động</option>--}}
+                           <option selected value="1">Đang hoạt động</option>
                             <option selected value="0">Ngưng hoạt động</option>
                         </select>
                         @error('status')<span class="text-danger">{{$message}}</span>@enderror

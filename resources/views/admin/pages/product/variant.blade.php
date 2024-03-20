@@ -35,7 +35,7 @@
                                             <div class="btn btn-link w-100 d-flex justify-content-between"
                                                 data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
                                                 aria-controls="collapseOne">
-                                                <span>Biến thể: <i class="text-danger">(Tối đa 10 biến thể)</i></span>
+                                                <span>Biến thể: </span>
                                                 <i class="fas fa-fw fa-chevron-down"></i>
                                             </div>
                                         </h5>
@@ -78,7 +78,9 @@
                                                                     name="variants[{{$variant->id}}][{{$key}}]"
                                                                     value='{{ $item }}'
                                                                     class="form-control float-right w-100"
-                                                                    placeholder="{{ $key }}" >
+                                                                    placeholder="{{ $key }}" 
+                                                                    {{ $variant->type == 1 ? "disabled" : ''}}
+                                                                    >
                                                                 </div>
 
                                                             @else
@@ -91,6 +93,7 @@
                                                                 </div>
                                                             @endif
                                                         @endForeach
+                                                        @if($variant->type != 1)
                                                         <div class="form-group float-right"
                                                             style="width: 10%; margin-right: 1%;">
                                                             <div class="btn btn-primary w-2 mb-5 float-right "
@@ -98,6 +101,7 @@
                                                                 style="    margin-top: 28%;"><i
                                                                     class="fas fa-fw fa-trash"></i></div>
                                                         </div>
+                                                        @endif
                                                     </div>
                                                 @endForeach
                                             </div>
@@ -115,10 +119,7 @@
 @endsection
 @section('javascript')
 <script>
-    $('#multiple-select-variant').select2({
-        maximumSelectionLength: 3, // Enforce maximum selection with Select2
-        placeholder: "Chọn loại biến thể (tối đa 3)" // Update placeholder with limit info
-    });
+    $('#multiple-select-variant').select2();
 </script>
     <script>
         function deleteVariant(url, id) {
@@ -198,10 +199,7 @@
                 variantHtml += '</div>';
                 var numberOfVariants = $('.variants-container .form-row').length;
                 // numberOfVariants += 1;
-                console.log('numberOfVariants', numberOfVariants)
-                if (numberOfVariants >= 10) {
-                    alert("Số lượng biến thể chỉ tối đa là 10.");
-                } else if (Object.keys(selectedOptions).length !== 0) {
+              if (Object.keys(selectedOptions).length !== 0) {
                     $('.variants-container').append(variantHtml);
                 } else {
                     // Thực hiện hành động khác nếu mảng selectedOptions rỗng
