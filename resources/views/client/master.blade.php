@@ -24,7 +24,7 @@
     <link rel="stylesheet" href="{{asset('client/css/sb-admin-2.min.css')}}">
 </head>
 
-<body>
+<body style="background: #ebe6e6 !important;">
     <!-- Page Preloder -->
     <div id="preloder">
         <div class="loader"></div>

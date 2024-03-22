@@ -7,20 +7,18 @@
             @if ($categories_slug != '')
                 <section class="breadcrumb-section set-bg" data-setbg="{{ asset('storage/' . $categories_slug->banner) }}">
             @else
-                <section class="container" style="background-color: red">
+                <section class="container container-info-shop">
             @endif
-                        <div class="row">
+                        <div class="row" style="    background-color: #58565666; border-radius: 15px;">
                             <div class="col-lg-12">
-                                <div class="breadcrumb__text pt-2">
-                                    <img style="width: 7%" src="https://salt.tikicdn.com/cache/w220/ts/seller/7d/3b/df/eee8d1f6b99ba58243f7e47337e0541e.jpg" alt="..." class="rounded-circle">
-                                    <h2>Siêu thị thực phẩm</h2>
-                                    <div class="breadcrumb__option">
-                                        <a href="{{ route('home') }}">Trang chủ</a>
-                                        @if ($categories_slug != '')
-                                            <span>{{ $categories_slug->nameCate }}</span>
-                                        @else
-                                            <span>Tát cả sản phẩm</span>
-                                        @endif
+                                <div class="breadcrumb__text pt-3 pb-3 d-flex justify-content-between">
+                                    <img style="width: 8% ;margin-right: 25%;" src="https://salt.tikicdn.com/cache/w220/ts/seller/7d/3b/df/eee8d1f6b99ba58243f7e47337e0541e.jpg" alt="..." class="rounded-circle">
+                                    <h4 style=" text-align: center; width: 33%; color:#fff; line-height: 84px;">Siêu thị thực phẩm</h4>
+                                    <div class="breadcrumb__option" style="width: 33%; padding-top: 2%;">
+                                        <form class="form-inline">
+                                            <input class="form-control mr-sm-2" style="    width: 78%;" type="search" placeholder="Tìm kiếm sản phẩm tại cửa hàng" aria-label="Search">
+                                            <button class="btn btn-success my-2 my-sm-0" type="submit">Search</button>
+                                          </form>
                                     </div>
                                 </div>
                             </div>
@@ -28,78 +26,48 @@
                 </section>
                 <!-- Breadcrumb Section End -->
                 <!-- Product Section Begin -->
-                <section class="product spad">
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-3 col-md-5">
-                                <div class="sidebar">
-                                    <div class="sidebar__item categories1">
-                                        <h4>danh mục</h4>
-                                        <ul>
-                                            @foreach ($category as $cate)
-                                                <li
-                                                    class=" {{ !empty(request('slug_cate')) && request('slug_cate') == $cate->slug ? 'active' : '' }} ">
-                                                    <a
-                                                        href="{{ route('products') . '?slug_cate=' . $cate->slug }}">{{ $cate->nameCate }}</a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                    <div class="sidebar__item">
-                                        <h4>Lọc sản phẩm</h4>
-                                        <div class="price-range-wrap">
-                                            <form name="fillter_pro" class="" action="" method="get">
-                                                @if (request('search'))
-                                                    <input type="hidden" name="search" value="{{ request('search') }}">
-                                                @endif
-                                                @if ($categories_slug != '')
-                                                    <input type="hidden" name="slug_cate" value="{{ $categories_slug->slug }}">
-                                                @endif
-
-                                                <input type="hidden" class="form-control bg-light border-0 small sreach" name="page"
-                                                       value="{{ request('page') ? request('page') : '1' }}" aria-label="Search"
-                                                       aria-describedby="basic-addon2">
-                                                <!-- <div class="price-range ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content" data-min="0" data-max="10000000">
-                                                    <div class="ui-slider-range ui-corner-all ui-widget-header"></div>
-                                                    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
-                                                    <span tabindex="0" class="ui-slider-handle ui-corner-all ui-state-default"></span>
-                                                </div> -->
-                                                <div class="range-slider">
-                                                    <label for="">Sắp xếp</label>
-                                                    <div class="price-input d-flex justify-content-between mb-3 w-100">
-                                                        <select class="custom-select w-100" name="sort" id="inputGroupSelect01">
-                                                            <option value="ASC" {{ request('sort') == 'ASC' ? 'selected' : '' }}>Giá
-                                                                tăng dần</option>
-                                                            <option value="DESC" {{ request('sort') == 'DESC' ? 'selected' : '' }}>Giá
-                                                                giảm dần</option>
-                                                        </select>
-                                                    </div>
-                                                    <label for="">Lọc theo giá</label>
-                                                    <div class="price-input d-flex justify-content-between">
-
-                                                        <input type="number" name="min"
-                                                               value="{{ request('min') ? request('min') : '' }}"
-                                                               class="border border-danger" placeholder="Tối thiểu...">
-                                                        <input type="number" name="max"
-                                                               value="{{ request('max') ? request('max') : '' }}"
-                                                               class="border border-danger" placeholder="Tối đa...">
-                                                    </div>
-                                                    <div class=" d-flex justify-content-between mt-2">
-                                                        <button type="submit" id="fillter_pro" class="site-btn">Lọc</button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
+                <section class="product spad" style="    padding-top: 27px;">
+                    <div class=" mb-2 container container-filter d-flex justify-content-between">
+                        <button type="button" class="btn btn-outline-dark">Bán  chạy</button>
+                        <button type="button" class="btn btn-outline-dark">Hàng mới</button>
+                        <button type="button" class="btn btn-outline-dark">Giá từ thấp tới cao</button>
+                        <button type="button" class="btn btn-outline-dark">Giá từ cao tới thấp</button>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-outline-dark" data-toggle="modal" data-target="#exampleModal">
+                            <img src="https://salt.tikicdn.com/ts/upload/3f/23/35/2d29fcaea0d10cbb85ce5b0d4cd20add.png" alt="filters" style="width: 20px;height: 20px;">
+                             Tất cả
+                        </button>
+                        
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                </div>
+                                <div class="modal-body">
+                                ...
+                                </div>
+                                <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
                                 </div>
                             </div>
-                            <div class="col-lg-9 col-md-7">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12" style="background: #fff;">
 
                                 <div class="row">
                                     @foreach ($products as $product)
 
-                                        <div class="col-lg-4 col-md-6 col-sm-6">
-                                            <div class="product__discount__item">
+                                        <div class="col-lg-3 col-md-6 col-sm-6" style="padding-top: 1%; margin-bottom: 1%;">
+                                            <div class="product__discount__item" style="border-radius: 15px; background: #e9e4e4;">
                                                 <div class="product__discount__item__pic set-bg"
                                                      data-setbg="{{ asset('storage/' . $product->image) }}">
                                                     @if ($product->discounts > 0)
@@ -143,6 +111,7 @@
                                                 </div>
                                             </div>
                                         </div>
+                                      
                                     @endforeach
                                 </div>
                                 <div class="product__pagination">
@@ -157,7 +126,21 @@
                     </div>
                 </section>
                 <!-- Product Section End -->
-
+<style>
+   .container-info-shop {
+    max-height: 155px;
+    background-image: url(https://salt.tikicdn.com/ts/tmp/3c/58/be/e9aed7e6b0ab91346072b53891ce7b7b.jpg);
+    position: relative;
+    background-size: cover;
+    z-index: 1;
+    border-radius: 15px;
+}
+.container-filter{
+    background: #fff;
+    padding: 1%;
+    border-radius: 15px 15px 0 0;
+}
+</style>
                 @endsection
 
             @section('javascript')
