@@ -88,7 +88,11 @@
                             </div>
                             <div class="card-body">
                                 @foreach ($Product->productVariant as $productVariant)
-                                    @if ($productVariant->quantity < 1)
+                                    @if ($productVariant->type == 1)
+                                        <div class="btn btn-outline-dark " style=" display: none" id="defaultVariant" data-id="{{ $productVariant->id }}"
+                                             data-image="{{ asset('storage/' . json_decode($productVariant->variant_value, true)['image']) }}"
+                                             >{{ $productVariant->variant_type }}</div>
+                                    @elseif ($productVariant->quantity < 1)
                                         <div class="btn btn-outline-dark disabled" style="    background-color: #d308084a;">
                                             {{ $productVariant->variant_type }}
                                         </div>
@@ -125,9 +129,9 @@
                             <a href="{{ route('shop',['id'=>$Product->User->id])  }}"  class="btn btn-outline-dark"> Xem shop</a>
                         </div>
                       </div>
-                   
+
                 </div>
-   
+
                 <div class="col-lg-12">
                     <div class="product__details__tab">
                         <ul class="nav nav-tabs" role="tablist">
@@ -250,7 +254,7 @@
     </section>
     <!-- Related Product Section End -->
     <style>
-    
+
         body {
             background-color: #eee
         }
@@ -313,6 +317,7 @@
         var productQuantity = {!! $Product->quantity !!};
 
         function beforeAddToCart(id) {
+            console.log('productVariants',productVariants.length)
             if (productVariants.length > 0) {
                 if (productVariant != '') {
                     addToCart(id, productVariant);
@@ -326,19 +331,31 @@
             }
 
         }
+        if (productVariants.length == 1){
+            selectVariant()
+        }
+        function selectVariant(element,dataId = '', dataImage = '') {
+            if(productVariants.length >0)
+            {
+                if (productVariants.length == 1){
+                     dataId = $("#defaultVariant").data('id');
+                     dataImage = $("#defaultVariant").data('image');
+                }else{
+                    console.log('defaultVariant',element)
+                    dataId = $(element).data('id');
+                    dataImage = $(element).data('image');
+                }
+                productVariant = productVariants.find(function (element) {
+                    return element.id === dataId;
+                });
+                console.log('element',dataId,dataImage)
+                productQuantity = productVariant['quantity'];
+                showVariant(JSON.parse(productVariant.variant_value))
 
-        function selectVariant(element) {
-            var dataId = $(element).data('id');
-            var dataImage = element.dataset.image;
-
-            productVariant = productVariants.find(function(element) {
-                return element.id === dataId;
-            });
-            productQuantity = productVariant['quantity'];
-            showVariant(JSON.parse(productVariant.variant_value))
-            $('.product__details__pic__item--large').attr('src', dataImage);
-            $(element).parent().find('.btn').removeClass('active');
-            $(element).addClass('active');
+                $('.product__details__pic__item--large').attr('src', dataImage);
+                $(element).parent().find('.btn').removeClass('active');
+                $(element).addClass('active');
+            }
         }
 
         function showVariant(variant) {

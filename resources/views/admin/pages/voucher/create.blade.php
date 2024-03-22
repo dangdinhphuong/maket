@@ -96,7 +96,9 @@
 <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css"/>
 <script>
-     $('.products_id').select2();
+     $('.products_id').select2({
+         maximumSelectionLength: 1, // Enforce maximum selection with Select2
+     });
      $(document).ready(function () {
         // Function to check if end time is greater than start time
         function istime_endValid() {

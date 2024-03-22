@@ -23,6 +23,7 @@
                                 @csrf
                                 <tbody>
                                     @foreach ($carts as $cart)
+                                        @php $variantValues = json_decode($cart->productVariant->variant_value, true); @endphp
                                         <tr id="pro{{ $cart->product_id }}">
                                             {{--                                        <th scope="row"> <input type="checkbox" class="form-check-input checkbox-prod-detail" name="id[]" value="{{ $cart->id }}"></th> --}}
                                             <input type="hidden" class="form-check-input checkbox-prod-detail"
@@ -30,33 +31,33 @@
                                             <td class="shoping__cart__item d-flex justify-content-start"
                                                 style='width: 450px;'>
                                                 <img style="width: 20%; height:120px"
-                                                    src="{{ asset('storage/' . $cart->products->image) }}"
+                                                    src="{{ asset('storage/' . $variantValues['image']) }}"
                                                     alt="{{ $cart->products->namePro }}">
                                                 <div>
                                                     <h5>
-                                                        <b>{{ $cart->products->namePro }} </b>
+                                                        <a style="color:black;" href="{{route('products').'?search='. $cart->products->namePro}}"> <b>{{ $cart->products->namePro }}</b></a>
                                                     </h5>
                                                     <br>
-                                                    @if (!empty($cart->productVariant))
+                                                    @if (!empty($cart->productVariant) && $cart->productVariant->type != 1)
                                                         <div class="header__top__right__language">
                                                             <div>Phân loại: <b>
                                                                     {{ $cart->productVariant->variant_type }}</b>
                                                             </div>
-                                                            @php $variantValues = json_decode($cart->productVariant->variant_value, true); @endphp
+
                                                             <span class="arrow_carrot-down"></span>
-                                                            <ul style="color: #ffffff;width: 200px; ">
+                                                            <ul style="background:#f1f1f1; color: #0d0d0d;width: 200px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);" class="border border-secondary">
                                                                 @foreach ($variantValues as $key => $item)
                                                                     @if ($key == 'color')
                                                                         <li>
-                                                                            <a>{{ $key }}:
+                                                                            <a style="color: black;">{{ $key }}:
                                                                                 <span
                                                                                     style="background-color: {{ $item }}; border-radius: 4px; color:{{ $item }}; font-size: 8px">{{ $item }}
                                                                                 </span>
                                                                             </a>
                                                                         </li>
                                                                     @elseif ($key != 'image' && $key != 'quantity' && $key != 'price' && $key != 'name')
-                                                                        <li>
-                                                                            <a>{{ $key }}:
+                                                                        <li >
+                                                                            <a  style="color: black;">{{ $key }}:
                                                                                 {{ $item }}</a>
                                                                         </li>
                                                                     @endif

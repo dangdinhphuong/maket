@@ -153,7 +153,7 @@ class ClientController extends Controller
         $category = $this->categories->load('products');
         return view('client.pages.products', compact('category', 'products', 'categories_slug'));
     }
-    
+
     public function shop(Request $request,$id)
     {
         $categories_slug = '';
@@ -181,7 +181,7 @@ class ClientController extends Controller
         }
         //dd($products[0]);
         $category = $this->categories->load('products');
-        return view('client.pages.products', compact('category', 'products', 'categories_slug'));
+        return view('client.pages.shop', compact('category', 'products', 'categories_slug'));
     }
 
 
@@ -490,7 +490,7 @@ class ClientController extends Controller
                $sales->update(['number_sale', $sales->number_sale -= 1]);
             }
             if (empty($request->vnp_ResponseCode) || $request->vnp_ResponseCode != "00") {
-                return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
+                return redirect()->route('payment')->with('error', 'Thanh toán đơn hàng thất bại');
             }
 
 
@@ -506,7 +506,8 @@ class ClientController extends Controller
             if ($carts->count() <= 0) {
                 return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
             }
-            $discounts = (int)$sales->discount_percent ?? 0;
+
+            $discounts = !empty($sales['discount_percent']) ? (int)$sales['discount_percent'] : 0;
 
             foreach ($carts as $cart) {
                 $product = Product::find($cart->products->id);
@@ -514,7 +515,7 @@ class ClientController extends Controller
                     return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
                 }
                 $totalPrice =  ceil($cart->productVariant->price * $cart->quantity);
-                if(in_array($cart->product_id, json_decode($sales->products_id))){
+                if(!empty($sales) && in_array($cart->product_id, json_decode($sales->products_id))){
                     if($totalPrice < $discounts){
                         $discount = $totalPrice;
                         $totalPrice = 0;
@@ -543,6 +544,7 @@ class ClientController extends Controller
             return redirect()->route('payment')->with('message', 'Đơn hàng mua thành công');
         } catch (Exception $e) {
             DB::rollBack();
+            dd($e->getMessage(), $e->getLine());
             return redirect()->route('payment')->with('error', 'Đơn hàng mua thất bại');
         }
     }
@@ -572,7 +574,7 @@ class ClientController extends Controller
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
                 }
-                $discounts = (int)$sales->discount_percent ?? 0;
+                $discount = !empty($sales->discount_percent) ? (int)$sales->discount_percent : 0;
 
                 foreach ($carts as $cart) {
                     $product = Product::find($cart->products->id);
@@ -581,15 +583,13 @@ class ClientController extends Controller
                         return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
                     }
                     $totalPrice =  ceil($cart->productVariant->price * $cart->quantity);
-                    if(in_array($cart->product_id, json_decode($sales->products_id))){
-                        if($totalPrice < $discounts){
+                    if(!empty($sales) && in_array($cart->product_id, json_decode($sales->products_id))){
+                        if($totalPrice < $discount){
                             $discount = $totalPrice;
                             $totalPrice = 0;
                         }else{
-                            $totalPrice = $totalPrice - $discounts;
+                            $totalPrice = $totalPrice - $discount;
                         }
-                    }else{
-                        $discount = 0;
                     }
 
                     $data['name'] = $cart->products->namePro;
@@ -604,6 +604,7 @@ class ClientController extends Controller
                    OrderDetail::create($data);
                    $cart->delete();
                 }
+
             } else {
                 $totalPayment = 0;
                 if ($carts->count() <= 0) {

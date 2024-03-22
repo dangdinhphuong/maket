@@ -28,7 +28,7 @@
                                         <td style="float: left;  text-align: left;">
                                             <h5>{{$cart->products->namePro}}</h5>
                                             <br>
-                                            @if (!empty($cart->productVariant))
+                                            @if (!empty($cart->productVariant) && $cart->productVariant->type != 1)
                                                 <div class="header__top__right__language">
                                                     <div>Phân loại: <b>
                                                             {{ $cart->productVariant->variant_type }}</b>

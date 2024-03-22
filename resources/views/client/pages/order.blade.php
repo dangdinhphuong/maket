@@ -10,6 +10,7 @@
                     <div class="shoping__cart__table">
                         <!-- Button trigger modal -->
                         @foreach ($orderDetails as $orderDetail)
+                            @php $variantValues = json_decode($orderDetail->productVariant->variant_value, true); @endphp
                             <div class="card mb-5" data-toggle="modal"
                                 data-target=".bd-example-modal-lg-{{ $orderDetail->id }}">
                                 <div class="card-header d-flex justify-content-between">
@@ -105,26 +106,39 @@
                                     </div>
                                 </div>
                                 <div class="card-body">
-                                    @php $variantValues = json_decode($orderDetail->productVariant->variant_value, true); @endphp
                                     <div class="shoping__cart__item d-flex justify-content-start" style="">
                                         <img style="width: 8%; height:88px"
                                             src="{{ asset('storage/' . $variantValues['image']) }}"
                                             alt="Mr. Saul Padberg I">
                                         <div style="margin-left: 2%;     width: 82%;">
                                             <h5>
-                                                <b>{{ $orderDetail->name }}</b>
+                                               <a style="color:black;" href="{{route('products').'?search='. $orderDetail->productVariant->product->namePro}}"> <b>{{ $orderDetail->name }}</b></a>
                                             </h5>
-                                            <div>
-                                                <div class="d-flex justify-content-start">Phân loại hàng :
-                                                    @foreach ($variantValues as $key => $variantValue)
-                                                        @if ($key == 'color')
-                                                            <div class="square ml-2"></div>
-                                                        @elseif($key != 'quantity' && $key != 'price' && $key != 'image')
-                                                            <span class=" ml-2"> {{ $variantValue }}</span>
-                                                        @endif
-                                                    @endforeach
+                                            @if (!empty($orderDetail->productVariant) && $orderDetail->productVariant->type != 1)
+                                                <div class="header__top__right__language">
+                                                    <div>Phân loại: <b> {{ $orderDetail->productVariant->variant_type }}</b>
+                                                    </div>
+                                                    <span class="arrow_carrot-down"></span>
+                                                    <ul style="background:#f1f1f1; color: #0d0d0d;width: 200px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);" class="border border-secondary">
+                                                        @foreach ($variantValues as $key => $item)
+                                                            @if ($key == 'color')
+                                                                <li>
+                                                                    <a style="color: black;">{{ $key }}:
+                                                                        <span
+                                                                            style="background-color: {{ $item }}; border-radius: 4px; color:{{ $item }}; font-size: 8px">{{ $item }}
+                                                                                </span>
+                                                                    </a>
+                                                                </li>
+                                                            @elseif ($key != 'image' && $key != 'quantity' && $key != 'price' && $key != 'name')
+                                                                <li >
+                                                                    <a  style="color: black;">{{ $key }}:
+                                                                        {{ $item }}</a>
+                                                                </li>
+                                                            @endif
+                                                        @endForeach
+                                                    </ul>
                                                 </div>
-                                            </div>
+                                            @endif
                                             <b>x{{ $orderDetail->quantity }}</b>
                                         </div>
                                         <div style="margin-left: 2%;     width: 10%;">
@@ -160,7 +174,7 @@
                                             {{ number_format(($orderDetail->price * $orderDetail->quantity)-$orderDetail->discount, 0, ',', '.') . ' ₫' }}
                                         </div>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                             <!-- Modal -->
@@ -211,6 +225,7 @@
                                                     </tr>
                                                     <tr>
                                                         <td colspan="5">
+                                                            @if ($orderDetail->productVariant->type != 1)
                                                             <div class="d-flex justify-content-start">Phân loại hàng :
 
                                                                 @foreach ($variantValues as $key => $variantValue)
@@ -221,6 +236,7 @@
                                                                     @endif
                                                                 @endforeach
                                                             </div>
+                                                            @endif
                                                         </td>
 
                                                     </tr>
