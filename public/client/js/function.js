@@ -23,6 +23,8 @@ function addToCart(id, productVariant = []) { // thêm sản phẩm có sô lư�
         error: function (response) {
             console.log('response', response.responseJSON)
             if (response.responseJSON.message) {
+                console.log('response.responseJSON.status',response.responseJSON.status)
+   
                 swal(response.responseJSON.message, {
                     icon: response.responseJSON.status,
                 });

@@ -91,7 +91,7 @@
 
 
 
-                        <div class="card w-100 mb-2" style="height: 125px">
+                        <div class="card w-100 mb-2" style="height: 125px; {{ count($Product->productVariant) == 1 ? 'display: none' : '' }}" >
                             <div class="card-header">
                                 Phân loại
                             </div>
@@ -126,23 +126,23 @@
                         @if ($config->market_status == 0)
                             <button type="button" class="btn btn-danger">Xin lỗi chợ đã đóng</button>
                         @else
-                            <button class="primary-btn" onclick="beforeAddToCart({{ $Product->id }})"
-                                {{ $Product->quantity <= 0 ? 'disabled' : '' }}>{{ $Product->quantity <= 0 ? 'Sản phẩm đã hết hàng' : 'Thêm vào giỏ hàng' }}</button>
+                            <button class="primary-btn" id="addtocart-btn" onclick="beforeAddToCart({{ $Product->id }})"
+                                {{ $Product->quantity <= 0 ? 'disabled' : '' }}>{{ $Product->quantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng' }}</button>
                         @endif
                         <a href="{{ route('shop',['id'=>$Product->User->id])  }}"  class="btn primary-btn"> Xem shop</a>
                     </div>
                 </div>
-                <div class="col-lg-12">
+                <div class="col-lg-12" style="background: #fff; border-radius: 15px">
                     <div class="product__details__tab">
                         <ul class="nav nav-tabs" role="tablist">
                             <li class="nav-item">
                                 <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab"
                                     aria-selected="true">Mô tả</a>
                             </li>
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
                                     aria-selected="false">Bình luận <span></span></a>
-                            </li>
+                            </li> --}}
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="tabs-1" role="tabpanel">
@@ -369,7 +369,11 @@
                     if (newInfo[key].label == 'color') {
                         variantHtml +=
                             `<li><b>${newInfo[key].label}</b> <span style="background-color: ${newInfo[key].value};">${newInfo[key].value}</span></li>`;
-                    } else if (newInfo[key].label != 'image' && newInfo[key].label != 'price') {
+                    } else if (newInfo[key].label == 'quantity') {
+                        quantityPro = parseFloat(newInfo[key].value) - 1;
+                        variantHtml += `<li><b>${newInfo[key].label}</b> <span id="${newInfo[key].label}_number" data-quantity="${quantityPro}">${quantityPro}</span></li>`;
+                    }
+                    else if (newInfo[key].label != 'image' && newInfo[key].label != 'price') {
                         variantHtml += `<li><b>${newInfo[key].label}</b> <span>${newInfo[key].value}</span></li>`;
                     }
                 }
@@ -474,12 +478,14 @@
                     return false;
                 }
             }
-            if ($button.hasClass('inc') && productQuantity >= parseFloat(oldValue) + 1) {
+            newProductQuantity =  productQuantity ;
+            if ($button.hasClass('inc') && newProductQuantity >= parseFloat(oldValue) + 1) {
                 newVal = parseFloat(oldValue) + 1;
             } else if ($button.hasClass('dec') && parseFloat(oldValue) - 1 > 0) {
                 // Don't allow decrementing below zero
                 newVal = parseFloat(oldValue) - 1;
             }
+            $('#quantity_number').text(newProductQuantity-newVal)
             $button.parent().find('input').val(newVal);
         });
     </script>

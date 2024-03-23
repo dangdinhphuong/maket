@@ -36,7 +36,7 @@ class ClientController extends Controller
 {
     protected $categories;
 
-    public function __construct( VnPayController $vnPayController)
+    public function __construct(VnPayController $vnPayController)
     {
         $this->vnPayController = $vnPayController;
         $this->categories = Category::orderBy('id', 'DESC')->limit(15)->get();
@@ -154,7 +154,7 @@ class ClientController extends Controller
         return view('client.pages.products', compact('category', 'products', 'categories_slug'));
     }
 
-    public function shop(Request $request,$id)
+    public function shop(Request $request, $id)
     {
         $categories_slug = '';
         // kiểm tra xem có  slug_cate không. nếu có thì lấy id catte từ slug
@@ -163,10 +163,10 @@ class ClientController extends Controller
             $categories_slug = $categories_slug ? $categories_slug : "";
         }
         $shop = User::find($id);
-            if(empty( $shop )){
-                return redirect()->back();
-            }
-        $products = Product::filter(array_merge(request(['search-product','search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
+        if (empty($shop)) {
+            return redirect()->back();
+        }
+        $products = Product::filter(array_merge(request(['search-product', 'search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
             ->where('status', 1)
             ->where('users_id', $id)
             ->with(['productVariant'])
@@ -182,7 +182,7 @@ class ClientController extends Controller
         }
         //dd($products[0]);
         $category = $this->categories->load('products');
-        return view('client.pages.shop', compact('category', 'products', 'categories_slug','shop'));
+        return view('client.pages.shop', compact('category', 'products', 'categories_slug', 'shop'));
     }
 
 
@@ -198,7 +198,7 @@ class ClientController extends Controller
     public function productDetail(Request $request, $slug)
     {
         $categories_slug = '';
-        $Product = Product::with(['User', 'User.groupUser', 'comments.customer', 'productVariant', 'productImage','category'])->where('slug', $slug)->where('status', 1)->first();
+        $Product = Product::with(['User', 'User.groupUser', 'comments.customer', 'productVariant', 'productImage', 'category'])->where('slug', $slug)->where('status', 1)->first();
         if (!$Product) {
             return redirect()->back();
         }
@@ -277,6 +277,13 @@ class ClientController extends Controller
             ->where('status', 1)
             ->first();
 
+        if (!$Product) { // kiểm tra xem sản phẩm có tồn tại
+            return response()->json([
+                'message' => "Không tìm thấy sản phẩm",
+                'status' => "error"
+            ], $status = 401);
+        }
+
         $CartQuery = Cart::where('product_id', $product_id)
             ->where('customer_id', auth()->user()->id);
 
@@ -286,49 +293,45 @@ class ClientController extends Controller
 
         $Cart = $CartQuery->first();
 
-
         // return [$data['productVariant']['id'], $Product,$Cart];
         try {
             DB::beginTransaction();
-            if (!empty($data['productVariant'])) {
-                $dataProductVariant =  $data['productVariant'];
-                $productQuantity =  (int)$dataProductVariant["quantity"];
-                $productVariantId = (int)$dataProductVariant["id"];
-                $productVariantById = ProductVariant::find($productVariantId);
-                if (!empty($productVariantById)) {
-                    $newQuantity =  $productVariantById->quantity - $quantity;
-                    $variantValues = json_decode($productVariantById['variant_value'], true);
-                    $variantValues["quantity"] = $newQuantity;
-                    $productVariantById->update([
-                        'variant_value' => json_encode($variantValues),
-                        'quantity' => $newQuantity
-                    ]);
-                }
-            } else {
-                $productQuantity =  $Product->quantity;
-                $newQuantity =  $productQuantity - $quantity;
-                $Product->update(['quantity' =>  $newQuantity]);
-            }
-            if (!$Product) { // kiểm tra xem sản phẩm có tồn tại
+            if (empty($data['productVariant'])) {
                 return response()->json([
-                    'message' => "Không tìm thấy sản phẩm",
+                    'message' => "Không yêu cầu nào được giửi lên",
                     'status' => "error"
                 ], $status = 401);
             }
+            $dataProductVariant =  $data['productVariant'];
+            $productQuantity =  (int)$dataProductVariant["quantity"];
+            $productVariantId = (int)$dataProductVariant["id"];
+            $productVariantById = ProductVariant::find($productVariantId);
 
             // check Sản phẩm hiện đã hết hàng
-            if ($productQuantity <= 0) {
+            if ($productVariantById->quantity <= 0) {
                 return response()->json([
                     'message' => "Sản phẩm hiện đã hết hàng",
                     'status' => "error"
                 ]);
             }
             // check số lượng san phẩm mua với số lượng hàng tồn kho
-            if ($productQuantity < $quantity) {
+            if ($productVariantById->quantity < $quantity) {
                 return response()->json([
                     'message' => "Sản phẩm hiện tại không còn đủ so với số lượng mua yêu cầu",
                     'status' => "error"
                 ], $status = 401);
+            }
+
+            if (!empty($productVariantById)) {
+                $newQuantity =  $productVariantById->quantity - $quantity;
+                $variantValues = json_decode($productVariantById['variant_value'], true);
+                $variantValues["quantity"] = $newQuantity;
+
+                $productVariantById->update([
+                    'variant_value' => json_encode($variantValues),
+                    'quantity' => $newQuantity
+                ]);
+                $Product->update(['quantity' => $newQuantity]);
             }
 
             if (!empty($Cart)) { // kiểm tra xem sản phẩm đã có trong giỏ hàng chưa nếu có r thì update thêm sl sản phẩm
@@ -345,6 +348,7 @@ class ClientController extends Controller
             ]);
         } catch (Exception $exception) {
             DB::rollBack();
+            dd( $exception->getMessage() , $exception->getLine());
             Log::error('message :', $exception->getMessage() . '--line :' . $exception->getLine());
             return redirect()->route('cp-admin.products.index')->with('error', 'Thêm sản phẩm thất bại !');
         }
@@ -359,7 +363,7 @@ class ClientController extends Controller
         try {
             DB::beginTransaction();
             $variantValues['quantity'] = $productCart->productVariant->quantity + $productCart->quantity;
-            $newData= ['quantity' => $variantValues['quantity'],'variant_value' => json_encode($variantValues)];
+            $newData = ['quantity' => $variantValues['quantity'], 'variant_value' => json_encode($variantValues)];
             ProductVariant::find($productCart->productVariant->id)->update($newData);
             $productCart->delete();
             DB::commit();
@@ -395,9 +399,9 @@ class ClientController extends Controller
     public function payment()
     {
         $carts = Cart::where('customer_id', auth()->user()->id)
-        ->orderBy('id', 'DESC')
-        ->with(['user', 'products', 'productVariant'])
-        ->get();
+            ->orderBy('id', 'DESC')
+            ->with(['user', 'products', 'productVariant'])
+            ->get();
 
         $totalMoney = 0;
         foreach ($carts as $cart) {
@@ -433,7 +437,7 @@ class ClientController extends Controller
             // số lượng lớn hơn đã có trong giỏ hàng thì - kho hàng
             if ((int)$data['quantity'] > $productCart->quantity) {
                 $addQuantityProd = (int)$data['quantity'] - $productCart->quantity;
-
+              //  dd($productCart->productVariant->quantity);
                 if ($addQuantityProd > $productCart->productVariant->quantity) {
                     return response()->json([
                         'message' => "Xin lỗi phân loại của sản phẩm không còn đủ ",
@@ -441,7 +445,7 @@ class ClientController extends Controller
                     ]);
                 }
                 $variantValues['quantity'] = $productCart->productVariant->quantity - $addQuantityProd;
-                $newData= ['quantity' => $variantValues['quantity'],'variant_value' => json_encode($variantValues)];
+                $newData = ['quantity' => $variantValues['quantity'], 'variant_value' => json_encode($variantValues)];
                 ProductVariant::find($productCart->productVariant->id)->update($newData);
                 $productCart->update(['quantity' => (int)$data['quantity']]);
             } else if ((int)$data['quantity'] < $productCart->quantity) {
@@ -454,7 +458,7 @@ class ClientController extends Controller
                     ]);
                 }
                 $variantValues['quantity'] = $productCart->productVariant->quantity + $addQuantityProd;
-                $newData= ['quantity' => $variantValues['quantity'],'variant_value' => json_encode($variantValues)];
+                $newData = ['quantity' => $variantValues['quantity'], 'variant_value' => json_encode($variantValues)];
                 ProductVariant::find($productCart->productVariant->id)->update($newData);
                 $productCart->update(['quantity' => (int)$data['quantity']]);
             }
@@ -488,7 +492,7 @@ class ClientController extends Controller
                 if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
                     return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
                 }
-               $sales->update(['number_sale', $sales->number_sale -= 1]);
+                $sales->update(['number_sale', $sales->number_sale -= 1]);
             }
             if (empty($request->vnp_ResponseCode) || $request->vnp_ResponseCode != "00") {
                 return redirect()->route('payment')->with('error', 'Thanh toán đơn hàng thất bại');
@@ -501,7 +505,7 @@ class ClientController extends Controller
 
             $carts = Cart::where('customer_id', auth()->user()->id)
                 ->orderBy('id', 'DESC')
-                ->with(['products','user','productVariant'])
+                ->with(['products', 'user', 'productVariant'])
                 ->get();
 
             if ($carts->count() <= 0) {
@@ -511,19 +515,15 @@ class ClientController extends Controller
             $discounts = !empty($sales['discount_percent']) ? (int)$sales['discount_percent'] : 0;
 
             foreach ($carts as $cart) {
-                $product = Product::find($cart->products->id);
-                if ($product->quantity < $cart->quantity) {
-                    return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
-                }
                 $totalPrice =  ceil($cart->productVariant->price * $cart->quantity);
-                if(!empty($sales) && in_array($cart->product_id, json_decode($sales->products_id))){
-                    if($totalPrice < $discounts){
+                if (!empty($sales) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                    if ($totalPrice < $discounts) {
                         $discount = $totalPrice;
                         $totalPrice = 0;
-                    }else{
+                    } else {
                         $totalPrice = $totalPrice - $discounts;
                     }
-                }else{
+                } else {
                     $discount = 0;
                 }
                 $data['name'] = $cart->products->namePro;
@@ -534,7 +534,7 @@ class ClientController extends Controller
                 $data['users_id'] = $cart->products->users_id;
                 $data['totalPrice'] = $totalPrice;
                 $data['product_variant_id'] = $cart->productVariant->id;
-                $data['discount']= $discount;
+                $data['discount'] = $discount;
 
                 OrderDetail::create($data);
                 $cart->delete();
@@ -557,20 +557,20 @@ class ClientController extends Controller
         DB::beginTransaction();
         try {
             $carts = Cart::where('customer_id', auth()->user()->id)
-            ->orderBy('id', 'DESC')
-            ->with(['products','user','productVariant'])
-            ->get();
+                ->orderBy('id', 'DESC')
+                ->with(['products', 'user', 'productVariant'])
+                ->get();
             if ($data['payment_method'] == "cash") {
-              if (!empty($data['voucher'])) {
-                $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
-                if (empty($sales)) {
-                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                if (!empty($data['voucher'])) {
+                    $sales = Sale::where('code', $data["voucher"])->where('number_sale', '>', 0)->where('active', 1)->first();
+                    if (empty($sales)) {
+                        return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                    }
+                    if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
+                        return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
+                    }
+                    $sales->update(['number_sale', $sales->number_sale -= 1]);
                 }
-                if (!$this->isDateLessThanToday($sales->time_start) || !$this->isDateGreaterThanToday($sales->time_end)) {
-                    return redirect()->back()->with('error', 'Mã giảm giá không hợp lệ');
-                }
-               $sales->update(['number_sale', $sales->number_sale -= 1]);
-            }
                 $order = Order::create(array_merge(request()->all(), ['users_id' => auth()->user()->id]));
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
@@ -578,17 +578,13 @@ class ClientController extends Controller
                 $discount = !empty($sales->discount_percent) ? (int)$sales->discount_percent : 0;
 
                 foreach ($carts as $cart) {
-                    $product = Product::find($cart->products->id);
 
-                    if ($product->quantity < $cart->quantity) {
-                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
-                    }
                     $totalPrice =  ceil($cart->productVariant->price * $cart->quantity);
-                    if(!empty($sales) && in_array($cart->product_id, json_decode($sales->products_id))){
-                        if($totalPrice < $discount){
+                    if (!empty($sales) && in_array($cart->product_id, json_decode($sales->products_id))) {
+                        if ($totalPrice < $discount) {
                             $discount = $totalPrice;
                             $totalPrice = 0;
-                        }else{
+                        } else {
                             $totalPrice = $totalPrice - $discount;
                         }
                     }
@@ -601,21 +597,16 @@ class ClientController extends Controller
                     $data['users_id'] = $cart->products->users_id;
                     $data['totalPrice'] = $totalPrice;
                     $data['product_variant_id'] = $cart->productVariant->id;
-                    $data['discount']= $discount;
-                   OrderDetail::create($data);
-                   $cart->delete();
+                    $data['discount'] = $discount;
+                    OrderDetail::create($data);
+                    $cart->delete();
                 }
-
             } else {
                 $totalPayment = 0;
                 if ($carts->count() <= 0) {
                     return redirect()->back()->with('error', 'Không có sản phẩm nào trong giỏ hàng');
                 }
                 foreach ($carts as $cart) {
-                    $product = Product::find($cart->products->id);
-                    if ($product->quantity < $cart->quantity) {
-                        return redirect()->back()->with('error', 'Sản phẩm không dủ trong kho');
-                    }
                     $totalPayment += ceil($cart->productVariant->price * $cart->quantity);
                 }
 
@@ -643,12 +634,12 @@ class ClientController extends Controller
     }
     public function order(Request $request)
     {
-        $orderDetails = OrderDetail::with(['order.User','productVariant.product.User'])
-        ->whereHas('order', function ($query) {
-            $query->where('users_id', auth()->id());
-        })
-        ->orderBy('id', 'DESC')->Paginate(5);
-//        dd($orderDetails);
+        $orderDetails = OrderDetail::with(['order.User', 'productVariant.product.User'])
+            ->whereHas('order', function ($query) {
+                $query->where('users_id', auth()->id());
+            })
+            ->orderBy('id', 'DESC')->Paginate(5);
+        //        dd($orderDetails);
         return view('client.pages.order', compact('orderDetails'));
     }
 
