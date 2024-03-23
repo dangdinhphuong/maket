@@ -28,7 +28,7 @@
 <section class="featured spad">
     <div class="container">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-12 pt-2" style="background: #fff;     border-radius: 15px 15px 0 0;">
                 <div class="section-title">
                     <h2>Sản phẩm nổi bật</h2>
                 </div>
@@ -49,15 +49,16 @@
                 </div>
             </div>
         </div>
-        <div class="row featured__filter">
-            @for( $i=0 ; $i < $category->count() ; $i++) 
+        <div class="row featured__filter" style="background: #fff;">
+            @for( $i=0 ; $i < $category->count() ; $i++)
              @if($category[$i]->products->count()>4)
-                    
-                @for( $y= 0 ; $y < 3 ; $y++) 
+
+                @for( $y= 0 ; $y < 3 ; $y++)
                 @if($category[$i]->products[$y]->status != 0)
 
                 <div class="col-lg-3 col-md-4 col-sm-6 mix {{$category[$i]->slug}} fresh-meat">
-                    <div class="product__discount__item featured__item">
+                    <div class="product__discount__item featured__item" style="border-radius: 15px; background: #e9e4e4;">
+                        <a href="{{ route('product',['slug'=>$category[$i]->products[$y]->slug]) }}">
                         <div class="product__discount__item__pic set-bg" data-setbg="{{asset('storage/' .$category[$i]->products[$y]->image)}}">
                             @if($category[$i]->products[$y]->discounts > 0)
                             <div class="product__discount__percent">-{{ $category[$i]->products[$y]->discounts  }}%</div>
@@ -67,11 +68,11 @@
                                         <li class="btn btn-warning w-100">Hết hàng</li>
                                     </ul>
                                     @else
-                            <ul class="product__item__pic__hover">
-                                <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                <li onclick="addCart({{$category[$i]->products[$y]->id}})"><a><i class="fa fa-shopping-cart"></i></a></li>
-                            </ul>
+{{--                            <ul class="product__item__pic__hover">--}}
+{{--                                <li><a href="#"><i class="fa fa-heart"></i></a></li>--}}
+{{--                                <li><a href="#"><i class="fa fa-retweet"></i></a></li>--}}
+{{--                                <li onclick="addCart({{$category[$i]->products[$y]->id}})"><a><i class="fa fa-shopping-cart"></i></a></li>--}}
+{{--                            </ul>--}}
                             @endif
                         </div>
                         <div class="product__discount__item__text">
@@ -85,6 +86,7 @@
                                 @endif
                             </div>
                         </div>
+                        </a>
                     </div>
                 </div>
                 @endif
@@ -94,26 +96,6 @@
         </div>
     </div>
 </section>
-<!-- Featured Section End -->
-
-<!-- Banner Begin -->
-<!-- <div class="banner">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="banner__pic">
-                    <img src="{{asset('client/img/banner/banner-1.jpg')}}" alt="">
-                </div>
-            </div>
-            <div class="col-lg-6 col-md-6 col-sm-6">
-                <div class="banner__pic">
-                    <img src="{{asset('client/img/banner/banner-2.jpg')}}" alt="">
-                </div>
-            </div>
-        </div>
-    </div>
-</div> -->
-<!-- Banner End -->
 
 
 

@@ -80,13 +80,22 @@
                                 @endif
                             </div>
                         @endif
-                        <ul id="info-Variant" style="padding-top: 0px; margin-top: 0px; margin-bottom: 2px">
-                        </ul>
-                        <div class="card w-100 mb-2">
+                        <div class="card w-100 mb-2" style="height: 160px;">
+                            <div class="card-body" style="overflow-y: auto;">
+                                <ul id="info-Variant" style="padding-top: 0px; margin-top: 0px; margin-bottom: 2px">
+                                    <li> Chọn phân loại ... </li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+
+
+                        <div class="card w-100 mb-2" style="height: 125px">
                             <div class="card-header">
                                 Phân loại
                             </div>
-                            <div class="card-body">
+                            <div class="card-body" style="overflow-y: auto;">
                                 @foreach ($Product->productVariant as $productVariant)
                                     @if ($productVariant->type == 1)
                                         <div class="btn btn-outline-dark " style=" display: none" id="defaultVariant" data-id="{{ $productVariant->id }}"
@@ -102,6 +111,7 @@
                                             onclick="selectVariant(this)">{{ $productVariant->variant_type }}</div>
                                     @endif
                                 @endforeach
+
                             </div>
                         </div>
 
@@ -119,19 +129,9 @@
                             <button class="primary-btn" onclick="beforeAddToCart({{ $Product->id }})"
                                 {{ $Product->quantity <= 0 ? 'disabled' : '' }}>{{ $Product->quantity <= 0 ? 'Sản phẩm đã hết hàng' : 'Thêm vào giỏ hàng' }}</button>
                         @endif
+                        <a href="{{ route('shop',['id'=>$Product->User->id])  }}"  class="btn primary-btn"> Xem shop</a>
                     </div>
                 </div>
-                <div class="col-lg-12 ">
-                    <div class="card">
-                        <div class="card-body">
-                            <img style="width:100px; height: 100px;" src="{{ asset('storage/' . $Product->User->avatar) }}" class="rounded float-left mr-2" alt="...">
-                            <div class=" mb-2" style="margin-top: 2%;"> {{ $Product->User->fullname }}</div>
-                            <a href="{{ route('shop',['id'=>$Product->User->id])  }}"  class="btn btn-outline-dark"> Xem shop</a>
-                        </div>
-                      </div>
-
-                </div>
-
                 <div class="col-lg-12">
                     <div class="product__details__tab">
                         <ul class="nav nav-tabs" role="tablist">
@@ -218,7 +218,7 @@
 
     <!-- Related Product Section Begin -->
     <section class="related-product">
-        <div class="container">
+        <div class="container pt-3" style="background: #fff; border-radius: 15px">
             <div class="row">
                 <div class="col-lg-12">
                     <div class="section-title related__product__title">
@@ -229,15 +229,16 @@
             <div class="row">
                 @foreach ($RelatedProducts->take(4) as $RelatedProduct)
                     <div class="col-lg-3 col-md-4 col-sm-6">
-                        <div class="product__item">
+                        <div class="product__item"  style="border-radius: 15px; background: #e9e4e4;">
+                            <a href="{{ route('product', ['slug' => $RelatedProduct->slug]) }}">
                             <div class="product__item__pic set-bg"
                                 data-setbg="{{ asset('storage/' . $RelatedProduct->image) }}">
-                                <ul class="product__item__pic__hover">
-                                    <li><a href="#"><i class="fa fa-heart"></i></a></li>
-                                    <li><a href="#"><i class="fa fa-retweet"></i></a></li>
-                                    <li onclick="addCart({{ $RelatedProduct->id }})"><a><i
-                                                class="fa fa-shopping-cart"></i></a></li>
-                                </ul>
+{{--                                <ul class="product__item__pic__hover">--}}
+{{--                                    <li><a href="#"><i class="fa fa-heart"></i></a></li>--}}
+{{--                                    <li><a href="#"><i class="fa fa-retweet"></i></a></li>--}}
+{{--                                    <li onclick="addCart({{ $RelatedProduct->id }})"><a><i--}}
+{{--                                                class="fa fa-shopping-cart"></i></a></li>--}}
+{{--                                </ul>--}}
                             </div>
                             <div class="product__item__text product__item__price">
                                 <h6><a
@@ -246,6 +247,7 @@
                                 <b>
                                     {{ number_format($RelatedProduct->price - ($RelatedProduct->price * $RelatedProduct->discounts) / 100, 0, ',', '.') . ' ₫' }}</b>
                             </div>
+                            </a>
                         </div>
                     </div>
                 @endforeach

@@ -49,7 +49,7 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 
-    
+
     public function productImage()
     {
         return $this->hasMany(ProductImage::class);
@@ -80,10 +80,10 @@ class Product extends Model
             //  lọc sản phẩm có giá tối đa
             if ($sort == 'ASC' || $sort == "DESC") {
                 $query->orderBy('price', $sort);
+            }else if($sort == 'newarrivals'){
+                $query->orderBy('created_at', "DESC");
             }
         });
-
-
         // lọc cho admin
         $query->when($filters['category_id'] ?? false, function ($query, $category_id) {
             $query->where('category_id', $category_id);
@@ -101,6 +101,9 @@ class Product extends Model
             }
         });
         $query->when($filters['search'] ?? false, function ($query, $search) {
+            $query->Where('namePro', 'LIKE', '%' . $search . '%');
+        });
+        $query->when($filters['search-product'] ?? false, function ($query, $search) {
             $query->Where('namePro', 'LIKE', '%' . $search . '%');
         });
     }

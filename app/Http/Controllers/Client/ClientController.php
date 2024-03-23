@@ -139,7 +139,7 @@ class ClientController extends Controller
         $products = Product::filter(array_merge(request(['search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
             ->where('status', 1)
             ->with(['productVariant'])
-            ->Paginate(10);
+            ->Paginate(12);
         foreach ($products as $index => $value) {
             if (count($value['productVariant']) > 0) {
                 $sortedProducts = $products[$index]['productVariant']->sortBy('price');
@@ -162,14 +162,15 @@ class ClientController extends Controller
             $categories_slug = Category::where('slug', request('slug_cate'))->first();
             $categories_slug = $categories_slug ? $categories_slug : "";
         }
-            if(empty( User::find($id))){
+        $shop = User::find($id);
+            if(empty( $shop )){
                 return redirect()->back();
             }
-        $products = Product::filter(array_merge(request(['search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
+        $products = Product::filter(array_merge(request(['search-product','search', 'min', 'max', 'sort']), ['categories_slug' => $categories_slug]))
             ->where('status', 1)
             ->where('users_id', $id)
             ->with(['productVariant'])
-            ->Paginate(10);
+            ->Paginate(12);
         foreach ($products as $index => $value) {
             if (count($value['productVariant']) > 0) {
                 $sortedProducts = $products[$index]['productVariant']->sortBy('price');
@@ -181,7 +182,7 @@ class ClientController extends Controller
         }
         //dd($products[0]);
         $category = $this->categories->load('products');
-        return view('client.pages.shop', compact('category', 'products', 'categories_slug'));
+        return view('client.pages.shop', compact('category', 'products', 'categories_slug','shop'));
     }
 
 
