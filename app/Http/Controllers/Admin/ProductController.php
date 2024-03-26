@@ -45,6 +45,7 @@ class ProductController extends Controller
         try {
             DB::beginTransaction();
             $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id', 'cost']);
+            $data['Description'] = $data['Description'] ?? "";
             $data['users_id'] = auth()->user()->id;
             $data['image'] = '';
             $product = Product::create($data);
@@ -126,7 +127,7 @@ class ProductController extends Controller
             DB::beginTransaction();
             $data = request(['namePro', 'quantity', 'slug', 'price', 'discounts', 'Description', 'status', 'category_id', 'supplier_id', 'origin_id']);
             $data['users_id'] = auth()->user()->id;
-
+            $data['Description'] = $data['Description'] ?? "";
 
             $Product->productImage()->where('type', 1)->delete();
             if ($request->hasFile('image')) {

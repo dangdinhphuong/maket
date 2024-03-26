@@ -24,7 +24,7 @@
                                 <tbody>
                                     @foreach ($carts as $cart)
                                         @php $variantValues = json_decode($cart->productVariant->variant_value, true); @endphp
-                                        <tr id="pro{{ $cart->product_id }}">
+                                        <tr id="pro{{ $cart->id }}">
                                             {{--                                        <th scope="row"> <input type="checkbox" class="form-check-input checkbox-prod-detail" name="id[]" value="{{ $cart->id }}"></th> --}}
                                             <input type="hidden" class="form-check-input checkbox-prod-detail"
                                                 name="id[]" value="{{ $cart->id }}">

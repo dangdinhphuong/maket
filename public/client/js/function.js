@@ -18,15 +18,21 @@ function addToCart(id, productVariant = []) { // thêm sản phẩm có sô lư�
             swal(res.message, {
                 icon: res.status,
                 timer: 1000
+            }).then(() => {
+                location.reload();
             });
         },
         error: function (response) {
             console.log('response', response.responseJSON)
             if (response.responseJSON.message) {
                 console.log('response.responseJSON.status',response.responseJSON.status)
-   
+
                 swal(response.responseJSON.message, {
                     icon: response.responseJSON.status,
+                }).then(() => {
+                    if(response.responseJSON.status == 'error'){
+                        location.reload();
+                    }
                 });
             }
             else swal(response.message, {

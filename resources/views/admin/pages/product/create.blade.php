@@ -37,7 +37,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <div class="col-sm-3 mb-3 mb-sm-0">
+                    <div class="col-sm-4 mb-3 mb-sm-0">
                         <label for="quantity">Số lượng sản phẩm<span class="text-danger">(*)</span></label>
                         <input type="number" class="form-control form-control-user" id="quantity" value="{{ old('quantity') }}" name="quantity" id="quantity" placeholder="Số lượng sản phẩm ...">
                         @error('quantity')
@@ -46,7 +46,7 @@
                         </span>
                         @enderror
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-4">
                         <label for="price">Giá gốc (đ)<span class="text-danger">(*)</span></label>
                         <input type="number" step="0.01"class="form-control form-control-user " id="cost" value="{{ old('cost') }}" name="cost" id="cost" placeholder="Giá nhập sản phẩm ...">
                         @error('cost')
@@ -55,7 +55,7 @@
                         </span>
                         @enderror
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-4">
                         <label for="price">Giá bán (đ)<span class="text-danger">(*)</span></label>
                         <input type="number" step="0.01"class="form-control form-control-user " id="price" value="{{ old('price') }}" name="price" id="price" placeholder="Giá tiền sản phẩm ...">
                         @error('price')
@@ -64,7 +64,7 @@
                         </span>
                         @enderror
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-3 d-none">
                         <label for="discounts">Giảm giá (%) <span class="text-danger">(*)</span></label>
                         <input type="number" class="form-control form-control-user " id="discounts" name="discounts" value="0" id="discounts" placeholder="Giảm bán sản phẩm ...">
                         @error('discounts')
@@ -122,7 +122,7 @@
                                 class="text-danger">(*)</span></label>
                                 <input id="image" type="file" name="image[]" class="form-control" multiple onchange="previewFile(this)">
                         <div class="d-flex justify-content-start previewFile">
-                
+
                         </div>
                         @error('image')
                             <span class="text-danger">{{ $message }}</span>

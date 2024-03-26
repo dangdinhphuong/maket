@@ -91,14 +91,14 @@
 
 
 
-                        <div class="card w-100 mb-2" style="height: 125px; {{ count($Product->productVariant) == 1 ? 'display: none' : '' }}" >
+                        <div class="card w-100 mb-2" style="height: 125px; " >
                             <div class="card-header">
                                 Phân loại
                             </div>
                             <div class="card-body" style="overflow-y: auto;">
                                 @foreach ($Product->productVariant as $productVariant)
                                     @if ($productVariant->type == 1)
-                                        <div class="btn btn-outline-dark " style=" display: none" id="defaultVariant" data-id="{{ $productVariant->id }}"
+                                        <div class="btn btn-outline-dark active" id="defaultVariant" data-id="{{ $productVariant->id }}"
                                              data-image="{{ asset('storage/' . json_decode($productVariant->variant_value, true)['image']) }}"
                                              >{{ $productVariant->variant_type }}</div>
                                     @elseif ($productVariant->quantity < 1)
@@ -119,7 +119,7 @@
                             @csrf
                             <div class="quantity">
                                 <div class="pro-qty">
-                                    <input type="text" id="quantity" value="1" disabled>
+                                    <input type="number" id="quantity" value="1" min=1>
                                 </div>
                             </div>
                         </div>
@@ -139,10 +139,10 @@
                                 <a class="nav-link active" data-toggle="tab" href="#tabs-1" role="tab"
                                     aria-selected="true">Mô tả</a>
                             </li>
-                            {{-- <li class="nav-item">
+                            <li class="nav-item">
                                 <a class="nav-link" data-toggle="tab" href="#tabs-3" role="tab"
                                     aria-selected="false">Bình luận <span></span></a>
-                            </li> --}}
+                            </li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="tabs-1" role="tabpanel">
@@ -175,7 +175,7 @@
                                                         @foreach ($Product->comments as $item)
                                                             @if ($item->status == 1)
                                                                 <div class="d-flex flex-row p-3"><img
-                                                                        src="https://i.imgur.com/zQZSWrt.jpg"
+                                                                        src="{{ asset('storage/' . $item->customer->avatar) }}"
                                                                         width="40" height="40"
                                                                         class="rounded-circle mr-3">
                                                                     <div class="w-100">
@@ -309,6 +309,11 @@
             font-size: 14px;
             margin-top: 12px
         }
+
+        .qtybtn {
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 @endsection
 
@@ -326,6 +331,8 @@
                 } else {
                     swal("Vui lòng chọn phân loại", {
                         icon: "error",
+                    }).then(() => {
+                        location.reload();
                     });
                 }
             } else {
@@ -485,7 +492,7 @@
                 // Don't allow decrementing below zero
                 newVal = parseFloat(oldValue) - 1;
             }
-            $('#quantity_number').text(newProductQuantity-newVal)
+            // $('#quantity_number').text(newProductQuantity-newVal)
             $button.parent().find('input').val(newVal);
         });
     </script>
