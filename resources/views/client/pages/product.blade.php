@@ -163,16 +163,17 @@
                                                     <div class="p-3">
                                                         <h6>Comments</h6>
                                                     </div>
+                                                    @if(!empty(auth()->user()))
                                                     <div class="mt-3 d-flex flex-row align-items-center p-3 form-color">
-                                                        <img src="https://i.imgur.com/zQZSWrt.jpg" width="50"
-                                                            class="rounded-circle mr-2">
+                                                        <img id="avatar-user" src="{{ asset('storage/' . auth()->user()->avatar) }}"width="40" height="40" class="rounded-circle mr-3">
                                                         <input type="text" class="form-control" id="commentInput"
                                                             placeholder="Enter your comment...">
                                                         <button onclick="addComment()" class="btn btn-primary">Submit
                                                         </button>
                                                     </div>
+                                                    @endif
                                                     <div class="mt-2" id="commentsContainer">
-                                                        @foreach ($Product->comments as $item)
+                                                        @foreach ($comments as $item)
                                                             @if ($item->status == 1)
                                                                 <div class="d-flex flex-row p-3"><img
                                                                         src="{{ asset('storage/' . $item->customer->avatar) }}"
@@ -190,12 +191,12 @@
                                                                         </div>
                                                                         <p class="text-justify comment-text mb-0">
                                                                             {{ $item->content }}</p>
-                                                                        <div class="d-flex flex-row user-feed"> <span
-                                                                                class="wish"><i
-                                                                                    class="fa fa-heartbeat mr-2"></i>24</span>
-                                                                            <span class="ml-3"><i
-                                                                                    class="fa fa-comments-o mr-2"></i>Reply</span>
-                                                                        </div>
+{{--                                                                        <div class="d-flex flex-row user-feed"> <span--}}
+{{--                                                                                class="wish"><i--}}
+{{--                                                                                    class="fa fa-heartbeat mr-2"></i>24</span>--}}
+{{--                                                                            <span class="ml-3"><i--}}
+{{--                                                                                    class="fa fa-comments-o mr-2"></i>Reply</span>--}}
+{{--                                                                        </div>--}}
                                                                     </div>
                                                                 </div>
                                                             @endif
@@ -318,6 +319,8 @@
 @endsection
 
 @section('javascript')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
     <script>
         var productVariants = {!! json_encode($Product->productVariant) !!}
         var productVariant = '';
@@ -408,30 +411,26 @@
 
 
             // // Get the value of the input field
-            // var newCommentText = $('#commentInput').val();
-
+            var srcValue = $('#avatar-user').attr('src');
+            var formattedDate = moment(data.created_at).utc().format('YYYY-MM-DD HH:mm:ss');
             // Create the new comment HTML
             var newCommentHTML = `
                     <div class="d-flex flex-row p-3">
-                        <img src="https://i.imgur.com/zQZSWrt.jpg" width="40" height="40" class="rounded-circle mr-3">
+                        <img src="${srcValue}" width="40" height="40" class="rounded-circle mr-3">
                         <div class="w-100">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex flex-row align-items-center">
                                     <span class="mr-2">${data.customer.fullname}</span>
                                 </div>
-                                <small>${data.created_at}</small>
+                                <small>${formattedDate}</small>
                             </div>
                             <p class="text-justify comment-text mb-0">${data.content}</p>
-                            <div class="d-flex flex-row user-feed">
-                                <span class="wish"><i class="fa fa-heartbeat mr-2"></i>0</span>
-                                <span class="ml-3"><i class="fa fa-comments-o mr-2"></i>Reply</span>
-                            </div>
                         </div>
                     </div>
                 `;
 
             // Append the new comment to the comments container
-            $('#commentsContainer').append(newCommentHTML);
+            $('#commentsContainer').prepend(newCommentHTML);
 
             // Clear the input field
             $('#commentInput').val('');

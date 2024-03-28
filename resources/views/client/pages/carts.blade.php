@@ -24,6 +24,7 @@
                                 <tbody>
                                     @foreach ($carts as $cart)
                                         @php $variantValues = json_decode($cart->productVariant->variant_value, true); @endphp
+{{--                                        {{ dd($variantValues['quantity']) }}--}}
                                         <tr id="pro{{ $cart->id }}">
                                             {{--                                        <th scope="row"> <input type="checkbox" class="form-check-input checkbox-prod-detail" name="id[]" value="{{ $cart->id }}"></th> --}}
                                             <input type="hidden" class="form-check-input checkbox-prod-detail"
@@ -91,6 +92,10 @@
                                                 @else
                                                     {{ number_format(ceil($cart->products->price - ($cart->products->price * $cart->products->discounts) / 100) * (int) $cart->quantity, 0, ',', '.') . ' ₫' }}
                                                 @endif
+                                                <br>
+                                                    <p class="text-danger">đã hết hàng</p>
+                                                    <br>
+                                                    <p class="text-danger">Kho hàng không đủ số lượng </p>
                                             </td>
                                             <td class="shoping__cart__item__close" style="text-align: right;">
                                                 {{-- <span class="icon_close" onclick="removeCart(50)"> xóa</span> --}}

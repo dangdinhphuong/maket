@@ -14,7 +14,7 @@
                         <input type="hidden" class="form-control bg-light border-0 small sreach" name="page" value="{{request('page') ? request('page') : '1' }}" aria-label="Search" aria-describedby="basic-addon2">
                         @if($categories_slug != "")
                                     <input type="hidden" name="Category_Blog" value="{{ $categories_slug->slug }}">
-                                    @endif       
+                                    @endif
                         <input type="text" value="{{ request('search') }}" name="search" placeholder="Search...">
                                 <button id="fillter_pro"  type="submit"><span class="icon_search"></span></button>
                             </form>
@@ -24,7 +24,7 @@
                             <ul>
                                 @foreach($CategoryBlogs as $CategoryBlog)
                                 <li class=" {{ !empty(request('Category_Blog')) && request('Category_Blog') == $CategoryBlog->slug ? 'active' :  ''  }} ">
-                                    <a href="{{ route('blogs').'?Category_Blog='.$CategoryBlog->slug  }}">{{ $CategoryBlog->name }} ({{ $CategoryBlog->blogs->count() }})</a></li>
+                                    <a href="{{ route('blogs').'?Category_Blog='.$CategoryBlog->slug  }}">{{ $CategoryBlog->name }} ({{ $CategoryBlogs[4]->blogs->where('status', 1)->count() }})</a></li>
                                 @endforeach
                             </ul>
                         </div>

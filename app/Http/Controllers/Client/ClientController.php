@@ -198,7 +198,7 @@ class ClientController extends Controller
     public function productDetail(Request $request, $slug)
     {
         $categories_slug = '';
-        $Product = Product::with(['User', 'User.groupUser', 'comments.customer', 'productVariant', 'productImage', 'category'])->where('slug', $slug)->where('status', 1)->first();
+        $Product = Product::with(['User', 'User.groupUser', 'comments.customer', 'productVariant', 'productImage', 'category','comments'])->where('slug', $slug)->where('status', 1)->first();
         if (!$Product) {
             return redirect()->back();
         }
@@ -214,8 +214,8 @@ class ClientController extends Controller
             $Product['minPiceProduct'] = $minPriceProduct->price;
             $Product['maxPriceProduct'] = $maxPriceProduct->price;
         }
-        // dd($Product->productVariant);
-        return view('client.pages.product', compact('Product', 'RelatedProducts'));
+        $comments = $Product->comments()->orderBy('id', 'DESC')->get();
+        return view('client.pages.product', compact('Product', 'RelatedProducts','comments'));
     }
 
     public function blogs(Request $request)
@@ -229,18 +229,18 @@ class ClientController extends Controller
         // dd($categories_slug);
         $CategoryBlogs = CategoryBlog::all();
         $CategoryBlogs->load('blogs');
-        $blogs = Blogs::filter(array_merge(request(['search']), ['categories_slug' => $categories_slug]))->orderBy('id', 'DESC')->Paginate(15);
-        $blogs->load('CategoryBlog'); // gọi blogs bên modelBlogSeed
-        $blogs->load('User');
-
+        $blogs = Blogs::filter(array_merge(request(['search']), ['categories_slug' => $categories_slug]))
+            ->where('status', 1)
+            ->with('CategoryBlog','User')
+            ->orderBy('id', 'DESC')
+            ->Paginate(15);
         return view('client.pages.blogs', compact('blogs', 'CategoryBlogs', 'categories_slug'));
     }
 
     public function blog(Request $request, $slug)
     {
         $categories_slug = '';
-        $Blog = Blogs::where('slug_blog', $slug)->where('status', 1)->first();
-        $Blog->load('CategoryBlog');
+        $Blog = Blogs::where('slug_blog', $slug)->where('status', 1)->with('CategoryBlog','User')->first();
         if (!$Blog) {
             return redirect()->back();
         }
@@ -252,8 +252,6 @@ class ClientController extends Controller
             ->where('cate_blog_id', $Blog->CategoryBlog->id)
             ->orderBy('id', 'DESC')
             ->get();
-        $Blog->load('CategoryBlog'); // gọi blogs bên modelBlogSeed
-        $Blog->load('User');
         //dd($Blog);
         return view('client.pages.blog', compact('Blog', 'CategoryBlogs', 'categories_slug', 'RelatedCategorys'));
     }
@@ -322,20 +320,22 @@ class ClientController extends Controller
                 ], $status = 401);
             }
 
-            if (!empty($productVariantById)) {
-                $newQuantity =  $productVariantById->quantity - $quantity;
-                $variantValues = json_decode($productVariantById['variant_value'], true);
-                $variantValues["quantity"] = $newQuantity;
-
-                $productVariantById->update([
-                    'variant_value' => json_encode($variantValues),
-                    'quantity' => $newQuantity
-                ]);
-                $Product->update(['quantity' => $newQuantity]);
-            }
+//            if (!empty($productVariantById)) {
+//                $newQuantity =  $productVariantById->quantity - $quantity;
+//                $variantValues = json_decode($productVariantById['variant_value'], true);
+//                $variantValues["quantity"] = $newQuantity;
+//
+//                $productVariantById->update([
+//                    'variant_value' => json_encode($variantValues),
+//                    'quantity' => $newQuantity
+//                ]);
+//                $Product->update(['quantity' => $newQuantity]);
+//            }
 
             if (!empty($Cart)) { // kiểm tra xem sản phẩm đã có trong giỏ hàng chưa nếu có r thì update thêm sl sản phẩm
-                $quantitys = (int)$Cart->quantity + $quantity;
+
+                $quantity += (int)$Cart->quantity;
+                $quantitys = $productVariantById->quantity < $quantity ? $productVariantById->quantity : $quantity;
                 $Cart->update(['quantity' => $quantitys]);
             } else {
                 $data = array_merge(['customer_id' => auth()->user()->id, 'product_id' => $product_id, 'quantity' => $quantity, 'product_variant_id' => $productVariantId]);
@@ -435,6 +435,8 @@ class ClientController extends Controller
         try {
             DB::beginTransaction();
             // số lượng lớn hơn đã có trong giỏ hàng thì - kho hàng
+           // dd((int)$data['quantity'] , $productCart->quantity,$productCart->productVariant->quantity);
+
             if ((int)$data['quantity'] > $productCart->quantity) {
                 $addQuantityProd = (int)$data['quantity'] - $productCart->quantity;
               //  dd($productCart->productVariant->quantity);
@@ -446,7 +448,8 @@ class ClientController extends Controller
                 }
                 $variantValues['quantity'] = $productCart->productVariant->quantity - $addQuantityProd;
                 $newData = ['quantity' => $variantValues['quantity'], 'variant_value' => json_encode($variantValues)];
-                ProductVariant::find($productCart->productVariant->id)->update($newData);
+                //ProductVariant::find($productCart->productVariant->id)->update($newData);
+                $data['quantity'] = $productCart->productVariant->quantity < $data['quantity'] ? $productCart->productVariant->quantity :  $data['quantity'];
                 $productCart->update(['quantity' => (int)$data['quantity']]);
             } else if ((int)$data['quantity'] < $productCart->quantity) {
                 $addQuantityProd = $productCart->quantity - (int)$data['quantity'];
@@ -459,7 +462,7 @@ class ClientController extends Controller
                 }
                 $variantValues['quantity'] = $productCart->productVariant->quantity + $addQuantityProd;
                 $newData = ['quantity' => $variantValues['quantity'], 'variant_value' => json_encode($variantValues)];
-                ProductVariant::find($productCart->productVariant->id)->update($newData);
+                //ProductVariant::find($productCart->productVariant->id)->update($newData);
                 $productCart->update(['quantity' => (int)$data['quantity']]);
             }
             DB::commit();
